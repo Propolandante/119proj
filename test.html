@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Homework 2</title>
+	<script type="text/javascript" src="paper-full.min.js"></script>
+</head>
+<body>
+	<canvas id="ourcanvas" resize></canvas>
+	<script type="text/paperscript" canvas="ourcanvas">
+		var path = new Path();
+		path.strokeColor = 'red';
+		var start = new Point(200, 200);
+		path.moveTo(start);
+		path.lineTo(start + [100, -40]);
+	</script>
+</body>
+</html>
