@@ -18,21 +18,24 @@ loadNextImage();
 pinLayer.activate();
 
 // Create a new path once, when the script is executed:
-var hitOptions, path;
+var hitOptions, pin;
 
 function onMouseDown(event) {
-	path = null;	
+	pin = null;	
 	var hitResult = project.hitTest(event.point, hitOptions);  
 	
 	//if hitResult is not a pin
 	if (!hitResult || hitResult.item.name == "image"){ 
 		var pinSize = 5;
-		var rectangle = new Rectangle(event.point.x-(pinSize/2),event.point.y-(pinSize/2),pinSize,pinSize);
-		var cornerSize = new Size(10, 10);
-		var path = new Path.Circle(event.point, pinSize);
-		path.strokeColor = 'black';
-		path.fillColor = 'blue';
-		path.selected = false;
+		// var rectangle = new Rectangle(event.point.x-(pinSize/2),event.point.y-(pinSize/2),pinSize,pinSize);
+		// var cornerSize = new Size(10, 10);
+		var pin = new Path.Circle(event.point, pinSize);
+		pin.strokeColor = 'black';
+		pin.fillColor = 'blue';
+		pin.onMouseEnter = function(event) {this.bringToFront(); this.scale(1.6);};
+		pin.onMouseLeave = function(event) {this.scale(0.625);};
+		
+		pin.selected = false;
 	}
 }
 
@@ -41,23 +44,23 @@ function onMouseMove(event) {
 	
 	if (event.item && event.item.name != "image"){	
 		event.item.selected = true;
-		path = event.item;
+		pin = event.item;
 	}
 	else{
-		path = null; // release the previous selected object
+		pin = null; // release the previous selected object
 	}
 }
 
 function onMouseDrag(event) {
-	if (path) {
-		path.position += event.delta;
+	if (pin) {
+		pin.position += event.delta;
 	}
 }
 
 function onKeyDown(event) {
 	if (event.key == 'delete'){ // while delete key is pressed
-		if(path){
-			path.remove();
+		if(pin){
+			pin.remove();
 		}
 	}
 }
