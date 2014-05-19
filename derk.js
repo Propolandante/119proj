@@ -30,20 +30,38 @@ function onMouseDown(event) {
 		// var rectangle = new Rectangle(event.point.x-(pinSize/2),event.point.y-(pinSize/2),pinSize,pinSize);
 		// var cornerSize = new Size(10, 10);
 		var pin = new Path.Circle(event.point, pinSize);
+		
+		
+		var obj = new Group();
+		obj.addChild(pin);
+		obj.addChild( makeTags(event,pin) );
+		
+		
 		pin.strokeColor = 'black';
 		pin.fillColor = 'blue';
-		pin.onMouseEnter = function(event) {this.bringToFront(); this.scale(1.6);};
-		pin.onMouseLeave = function(event) {this.scale(0.625);};
+		pin.onMouseEnter = function(event) {
+			obj.bringToFront();
+			this.scale(1.6);
+			obj.children['text'].visible = true;
+			};
+		pin.onMouseLeave = function(event) {
+			this.scale(0.625);
+			obj.children['text'].visible = false;
+			};
 		
 		pin.selected = false;
-	}
+		
+		// var obj = new Group();
+		// obj.addChild(pin);
+		// obj.addChild( makeTags(event,pin) );
+	} 
 }
 
 function onMouseMove(event) {
 	project.activeLayer.selected = false; // deselect all object
 	
 	if (event.item && event.item.name != "image"){	
-		event.item.selected = true;
+		//event.item.selected = true;
 		pin = event.item;
 	}
 	else{
@@ -116,4 +134,28 @@ function loadNextImage() {
 	
 	//revert back to pin layer
 	pinLayer.activate();
+};
+
+function makeTags(event){
+	//console.log ("path " + event.item);
+	var fullname = prompt("Object name.", " ");
+	var text = new PointText(event.point.x,event.point.y+25);
+	text.content = fullname;
+	text.style = {
+    	fontFamily: 'Courier New',
+    	fontWeight: 'bold',
+    	fontSize: 18,
+    	fillColor: 'blue',
+    	justification: 'center'
+	};
+	text.visible = false;
+	text.name = "text";
+	// text.addChild(event.item); 
+	// event.item.addChile(text)  
+	
+	// var group = new Group(); // it seems that parenting only works for Group object
+	// group.addChild(text);
+	// console.log ("path child " + group.children[0]);
+	
+	return text;
 };
