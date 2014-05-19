@@ -1,15 +1,16 @@
 //derk.js
 
+
 var img_number = 0;
 var img_count = 10; // total number of images in directory
 var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/images/";
 
 
 
-var raster;
+var raster; // image to be displayed
 
 var imageLayer = project.activeLayer;
-var pinLayer = new Layer();
+var pinLayer = new Layer(); // all pins and text labels go in this label
 
 //load initial image in imageLayer
 loadNextImage();
@@ -17,75 +18,148 @@ loadNextImage();
 //switch to pinLayer for pin placement
 pinLayer.activate();
 
-// Create a new path once, when the script is executed:
-var hitOptions, pin;
-
-function onMouseDown(event) {
-	pin = null;	
-	var hitResult = project.hitTest(event.point, hitOptions);  
-	
-	//if hitResult is not a pin
-	if (!hitResult || hitResult.item.name == "image"){ 
-		var pinSize = 5;
-		// var rectangle = new Rectangle(event.point.x-(pinSize/2),event.point.y-(pinSize/2),pinSize,pinSize);
-		// var cornerSize = new Size(10, 10);
-		var pin = new Path.Circle(event.point, pinSize);
-		
-		
-		var obj = new Group();
-		obj.addChild(pin);
-		obj.addChild( makeTags(event,pin) );
-		
-		
-		pin.strokeColor = 'black';
-		pin.fillColor = 'blue';
-		pin.onMouseEnter = function(event) {
-			obj.bringToFront();
-			this.scale(1.6);
-			obj.children['text'].visible = true;
-			};
-		pin.onMouseLeave = function(event) {
-			this.scale(0.625);
-			obj.children['text'].visible = false;
-			};
-		
-		pin.selected = false;
-		
-		// var obj = new Group();
-		// obj.addChild(pin);
-		// obj.addChild( makeTags(event,pin) );
-	} 
-}
-
-function onMouseMove(event) {
-	project.activeLayer.selected = false; // deselect all object
-	
-	if (event.item && event.item.name != "image"){	
-		//event.item.selected = true;
-		pin = event.item;
-	}
-	else{
-		pin = null; // release the previous selected object
-	}
-}
-
-function onMouseDrag(event) {
-	if (pin) {
-		pin.position += event.delta;
-	}
-}
-
-function onKeyDown(event) {
-	if (event.key == 'delete'){ // while delete key is pressed
-		if(pin){
-			pin.remove();
-		}
-	}
-}
-
+var draggingPin = null;
 
 /////// HANDLE CLICKS /////////
 
+var mousePosX,mousePosY;
+var enteredText;
+
+var typing = false;
+
+function onMouseDown(event) {
+	
+	console.log("onMouseDown");
+	
+	var inBounds = false;
+	
+	//check to make sure click is within the image boundaries	
+	
+	if(raster.contains(event.point))
+	{
+		inBounds = true;
+	}
+	
+	//check to see if the click is on a pin
+		
+	
+	var pins = pinLayer.children;
+	console.log("pins: " + pins.length);
+	
+	var sd = 100000; // shortest distance
+	var closestPin = null;
+	
+	if(inBounds && !typing)
+	{
+	
+		for(i = 0; i < pins.length; i++)
+		{
+			if (pins[i].children['pin'].contains(event.point))
+			{
+				console.log("pins["+i+"]("+pins[i].id+") CLICKED");
+				if (event.point.getDistance(pins[i].children['pin'].position) < sd)
+				{
+					// if it is on multiple pins, choose the closest one
+					
+					sd = event.point.getDistance(pins[i].children['pin'].position);
+					console.log("sd = " + sd);
+					closestPin = pins[i];
+					console.log("closestPin = pins[" + i + "]");
+				}
+			}
+			else
+			{
+				console.log("pins["+i+"]("+pins[i].id+") NOT");
+			}
+		}
+		 if(closestPin) //if there is a pin, then this pin is now DRAGGING
+		 {
+		 	draggingPin = closestPin;
+		 	draggingPin.dragging = true;
+		 	
+		 	// console.log("id check: " + draggingPin.id + " vs " + closestPin.id);
+		 	console.log("draggingPin selected, object ID is " + draggingPin.id);
+		 	
+		 	closestPin = null; // reset closestPin (might be unnecessary)
+		 	sd = 10000; // reset the shortest distance (might be unnecessary)
+		 }
+		 else if(inBounds)//if there is no pin, create a pin
+		 {
+		 	console.log("Creating a pin");
+		 	createPin(event);
+		 }
+	
+	
+	}
+	
+	
+		
+}
+
+function onMouseUp(event) {
+	
+	//if I was dragging a pin before, that pin is no longer DRAGGING
+	if(draggingPin)
+	{
+		draggingPin.dragging = false;
+	}
+	draggingPin = null;
+	//console.log("No draggingPin");
+	
+};
+
+function onMouseMove(event) {
+	
+	//if I am DRAGGING a pin, move the pin's position to the position of the mouse
+	if(draggingPin)
+	{
+		//console.log("We have a draggingPin");
+		if(draggingPin.dragging)
+		{
+			draggingPin.position += event.delta;
+		}
+		else
+		{
+			console.log("Uh, oh, draggingPin isn't dragging!");
+		}
+	}
+	
+		
+	
+}
+
+ function onKeyDown(event) {
+	// if (event.key == 'delete'){ // while delete key is pressed
+// 		
+		// var pins = pinLayer.children;
+		// var sd = 100000; // shortest distance
+		// var closestPin = null;
+// 		
+		// console.log("event.point: "+ event.lastPoint);
+// 		
+		// //check to see if hovering over a pin
+		// for(i = 0; i < pins.length; i++)
+		// {
+			// if (pins[i].children['pin'].contains(event.point))
+			// {
+				// console.log("pins["+i+"]("+pins[i].id+") CLICKED");
+				// if (event.point.getDistance(pins[i].children['pin'].position) < sd)
+				// {
+					// // if it is on multiple pins, choose the closest one
+// 					
+					// sd = event.point.getDistance(pins[i].children['pin'].position);
+					// console.log("sd = " + sd);
+					// closestPin = pins[i];
+					// console.log("closestPin = pins[" + i + "]");
+				// }
+			// }
+			// else
+			// {
+				// console.log("pins["+i+"]("+pins[i].id+") NOT");
+			// }
+		// }
+	// }
+}
 
 
 //clicking the button loads the next image
@@ -129,18 +203,80 @@ function loadNextImage() {
 	img.remove();
 	
 	//position the raster
-	raster.position.x = view.center.x;
-	raster.position.y = raster.height/2 + 10;
+	///raster.position.x = view.center.x;
+	//raster.position.y = view.center.y;
+	//raster.position.y = raster.height/2 + 10;
+	raster.position = new Point(450,350);
+	
+	//lower image opacity for better text visibility
+	raster.opacity = 0.85;
 	
 	//revert back to pin layer
 	pinLayer.activate();
 };
 
-function makeTags(event){
+function createPin(event) {
+	var pinSize = 7;
+	var pin = new Path.Circle(event.point, pinSize);
+	
+	//console.log("pin radius: "+pin.radius);
+	
+	// set pin colors
+	pin.strokeColor = 'black';
+	pin.fillColor = 'blue';
+	pin.name = "pin";
+	pin.dragging = false;
+	
+	console.log("pin is drawn");
+	
+	//group pin and text together
+	var objectLabel = new Group();
+	objectLabel.name = "objectLabel";
+	objectLabel.addChild(pin);
+	//objectLabel.addChild( makeTags(event,pin) );
+	console.log("Creating text box now");
+	zxcMakeTextBox(event, objectLabel);
+	
+	
+	console.log("group id: "+objectLabel.id);
+	
+	//define pin behavior on mouseOver
+	pin.onMouseEnter = function(event) 
+	{
+		//bring pin to front in case of overlap
+		objectLabel.bringToFront();
+		
+		//grow pin to emphasize which one is selected and hint that it can be dragged
+		// this.scale(1.6);
+		console.log("hover");
+		
+		//display text
+		if(objectLabel.children['text'])
+		{
+			objectLabel.children['text'].visible = true;
+		}
+	};
+	pin.onMouseLeave = function(event) 
+	{
+		// this.scale(0.625);
+		console.log("unhover");
+		
+		if(objectLabel.children['text'])
+		{
+			objectLabel.children['text'].visible = false;
+		}
+	};
+	
+	pin.selected = false;
+};
+
+function makeTags(x, y, tagText){
 	//console.log ("path " + event.item);
-	var fullname = prompt("Object name.", " ");
-	var text = new PointText(event.point.x,event.point.y+25);
-	text.content = fullname;
+	//var fullname = prompt("Object name.", " ");
+	//zxcMakeTextBox(event.point.x, event.point.y);
+	
+	var text = new PointText(x, y+25);
+	text.content = tagText;
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
@@ -150,12 +286,58 @@ function makeTags(event){
 	};
 	text.visible = false;
 	text.name = "text";
-	// text.addChild(event.item); 
-	// event.item.addChile(text)  
-	
-	// var group = new Group(); // it seems that parenting only works for Group object
-	// group.addChild(text);
-	// console.log ("path child " + group.children[0]);
 	
 	return text;
 };
+
+function zxcMakeTextBox(event, group){
+	
+	console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
+	
+	typing = true;
+	var x = event.point.x;
+	var y = event.point.y;
+	
+  	zxcTextBox = document.createElement('INPUT'); 
+  	zxcTextBox.type='text'; // same as create  <input  type="text" > in html
+  	
+  	zxcTextBox.size=10;
+  	
+  	document.getElementsByTagName('BODY')[0].appendChild(zxcTextBox);
+  	
+  	// ****** 
+  	// codes about styles/css
+  	
+  	zxcTextBox.style.position ='absolute';
+  	zxcTextBox.style.left     = event.point.x+'px';
+  	zxcTextBox.style.top      = event.point.y+'px';
+  	zxcTextBox.style.fontSize = (12)+'px';      
+  	
+  	// ******
+  	
+  	// after created, if the mouse is on the textbox, textbox will be highlighted
+  	zxcTextBox.focus(); 
+  
+    
+    // press enter to finish typing
+  	zxcTextBox.onkeydown = function(event){ 
+  		console.log ("before enter " + zxcTextBox.value);
+  		
+  		
+  		
+  		if (event.keyCode == '13')
+  		{
+  			console.log("ENTER HAS BEEN PRESSED");
+  			group.addChild(makeTags(x, y, zxcTextBox.value));
+  			console.log("textGroup id =  " + group.id);
+  			//text = zxcTextBox.value;
+  			//console.log("text: " + text);
+  			this.style.visibility='hidden';
+  			typing = false; 
+  		//	imageLayer.activate();
+  		}
+  	};
+   //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
+   //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
+   
+}
