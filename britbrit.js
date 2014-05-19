@@ -20,11 +20,11 @@ img.remove();
 raster.position = view.center;
 
 
-// Scale the raster by 50%
-//raster.scale(0.5);
 
-// Rotate the raster by 45 degrees:
-//aster.rotate(45);
+// Jiayu
+// this is the text box code
+// It supposedly uses the CSS file
+// styles.css
 
 function onMouseDown(event) {
 	var input = document.createElement("input");
@@ -32,4 +32,6 @@ function onMouseDown(event) {
 	input.className = "input"; // set the CSS class
 	document.body.appendChild(input); // put it into the DOM
 }
+
+
 
