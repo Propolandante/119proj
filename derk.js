@@ -128,9 +128,9 @@ function onMouseUp(event) {
 		userReport[img_number].objects[draggingPin.objectIndex].y = event.point.y;
 		
 		//console.log the new position
-		console.log("Updated pin " + draggingPin.id + " to new position (" 
-		+ userReport[img_number].objects[draggingPin.objectIndex].x + "," 
-		+ userReport[img_number].objects[draggingPin.objectIndex].y + ")");
+		// console.log("Updated pin " + draggingPin.id + " to new position (" 
+		// + userReport[img_number].objects[draggingPin.objectIndex].x + "," 
+		// + userReport[img_number].objects[draggingPin.objectIndex].y + ")");
 		
 		//this pin is no longer being dragged
 		draggingPin.dragging = false;
@@ -139,7 +139,7 @@ function onMouseUp(event) {
 	}
 	else if (draggingPin && !inBounds)
 	{
-		console.log("Since it was dragged off the image, we are deleting everything about pin " + draggingPin.id);
+		// console.log("Since it was dragged off the image, we are deleting everything about pin " + draggingPin.id);
 		
 		//nullify JSON data for this pin
 		//NOTE: we can not delete this JSON data since it is in the middle of the array,
@@ -327,7 +327,7 @@ function makeTags(x, y, tagText){
 
 function zxcMakeTextBox(event, group){
 	
-	console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
+	// console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
 	
 	//set typing to TRUE to prevent user from creating new pins
 	typing = true;
@@ -389,22 +389,22 @@ function zxcMakeTextBox(event, group){
   		if (event.keyCode == '13')
   		{
   			
-  			console.log("ENTER HAS BEEN PRESSED");
+  			// console.log("ENTER HAS BEEN PRESSED");
   			
   			var input = zxcTextBox.value;
   			
   			//if the user pressed ENTER without typing anything
   			if (!input)
   			{
-  				console.log("Since nothing was typed in the text box, we are deleting everything about this pin:");
+  				// console.log("Since nothing was typed in the text box, we are deleting everything about this pin:");
   				
   				//delete the pin JSON data
   				userReport[img_number].objects.pop();
-  				console.log("JSON data (hopefully) deleted.");
+  				// console.log("JSON data (hopefully) deleted.");
   				
   				//as well as the pin and objectLabel group!
   				group.remove();
-  				console.log("objectLabel group and children (hopefully) removed.");
+  				// console.log("objectLabel group and children (hopefully) removed.");
   				
   				popUp = false;
   				
