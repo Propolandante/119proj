@@ -1,16 +1,15 @@
 //derk.js
 
-
-var img_number = 0;
+// global variables
+var img_number = 0; //there is no "image 0", this is incremented before loading each image
 var img_count = 10; // total number of images in directory
 var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/images/";
-
-
-
+var draggingPin = null; // pin being dragged
 var raster; // image to be displayed
-
-var imageLayer = project.activeLayer;
+var imageLayer = project.activeLayer; // this layer holds the raster
 var pinLayer = new Layer(); // all pins and text labels go in this label
+var typing = false; // true if text box is active (nothing else should happen until this is false again)
+var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 
 //load initial image in imageLayer
 loadNextImage();
@@ -18,18 +17,25 @@ loadNextImage();
 //switch to pinLayer for pin placement
 pinLayer.activate();
 
-var draggingPin = null;
+
+function imageData(id)
+{
+	this.imageId = id;
+	this.objects = [];
+}
+
+function objectData(x,y,id)
+{
+	this.x = x;
+	this.y = y;
+	this.objectId = id;
+	this.name = "";
+}
+
 
 /////// HANDLE CLICKS /////////
 
-var mousePosX,mousePosY;
-var enteredText;
-
-var typing = false;
-
 function onMouseDown(event) {
-	
-	console.log("onMouseDown");
 	
 	var inBounds = false;
 	
@@ -42,34 +48,28 @@ function onMouseDown(event) {
 	
 	//check to see if the click is on a pin
 		
-	
 	var pins = pinLayer.children;
-	console.log("pins: " + pins.length);
 	
 	var sd = 100000; // shortest distance
 	var closestPin = null;
 	
 	if(inBounds && !typing)
 	{
-	
 		for(i = 0; i < pins.length; i++)
 		{
 			if (pins[i].children['pin'].contains(event.point))
 			{
-				console.log("pins["+i+"]("+pins[i].id+") CLICKED");
+				//console.log("pins["+i+"]("+pins[i].id+") CLICKED");
 				if (event.point.getDistance(pins[i].children['pin'].position) < sd)
 				{
 					// if it is on multiple pins, choose the closest one
-					
 					sd = event.point.getDistance(pins[i].children['pin'].position);
-					console.log("sd = " + sd);
 					closestPin = pins[i];
-					console.log("closestPin = pins[" + i + "]");
 				}
 			}
 			else
 			{
-				console.log("pins["+i+"]("+pins[i].id+") NOT");
+				//console.log("pins["+i+"]("+pins[i].id+") NOT");
 			}
 		}
 		 if(closestPin) //if there is a pin, then this pin is now DRAGGING
@@ -78,22 +78,16 @@ function onMouseDown(event) {
 		 	draggingPin.dragging = true;
 		 	
 		 	// console.log("id check: " + draggingPin.id + " vs " + closestPin.id);
-		 	console.log("draggingPin selected, object ID is " + draggingPin.id);
+		 	// console.log("draggingPin selected, object ID is " + draggingPin.id);
 		 	
 		 	closestPin = null; // reset closestPin (might be unnecessary)
 		 	sd = 10000; // reset the shortest distance (might be unnecessary)
 		 }
-		 else if(inBounds)//if there is no pin, create a pin
+		 else //if there is no pin, create a pin
 		 {
-		 	console.log("Creating a pin");
 		 	createPin(event);
-		 }
-	
-	
-	}
-	
-	
-		
+		 }	
+	}		
 }
 
 function onMouseUp(event) {
@@ -101,10 +95,21 @@ function onMouseUp(event) {
 	//if I was dragging a pin before, that pin is no longer DRAGGING
 	if(draggingPin)
 	{
+		//update JSON coordinate info for dragged pin
+		
+		userReport[img_number].objects[draggingPin.objectIndex].x = event.point.x;
+		userReport[img_number].objects[draggingPin.objectIndex].y = event.point.y;
+		
+		//console.log the new position
+		console.log("Updated pin " + draggingPin.id + " to new position (" 
+		+ userReport[img_number].objects[draggingPin.objectIndex].x + "," 
+		+ userReport[img_number].objects[draggingPin.objectIndex].y + ")");
+		
+		//this pin is no longer being dragged
 		draggingPin.dragging = false;
+		//we are no longer dragging a pin
+		draggingPin = null;
 	}
-	draggingPin = null;
-	//console.log("No draggingPin");
 	
 };
 
@@ -113,62 +118,31 @@ function onMouseMove(event) {
 	//if I am DRAGGING a pin, move the pin's position to the position of the mouse
 	if(draggingPin)
 	{
-		//console.log("We have a draggingPin");
 		if(draggingPin.dragging)
 		{
 			draggingPin.position += event.delta;
 		}
 		else
 		{
+			// this should never happen
 			console.log("Uh, oh, draggingPin isn't dragging!");
 		}
 	}
-	
-		
-	
 }
 
- function onKeyDown(event) {
-	// if (event.key == 'delete'){ // while delete key is pressed
-// 		
-		// var pins = pinLayer.children;
-		// var sd = 100000; // shortest distance
-		// var closestPin = null;
-// 		
-		// console.log("event.point: "+ event.lastPoint);
-// 		
-		// //check to see if hovering over a pin
-		// for(i = 0; i < pins.length; i++)
-		// {
-			// if (pins[i].children['pin'].contains(event.point))
-			// {
-				// console.log("pins["+i+"]("+pins[i].id+") CLICKED");
-				// if (event.point.getDistance(pins[i].children['pin'].position) < sd)
-				// {
-					// // if it is on multiple pins, choose the closest one
-// 					
-					// sd = event.point.getDistance(pins[i].children['pin'].position);
-					// console.log("sd = " + sd);
-					// closestPin = pins[i];
-					// console.log("closestPin = pins[" + i + "]");
-				// }
-			// }
-			// else
-			// {
-				// console.log("pins["+i+"]("+pins[i].id+") NOT");
-			// }
-		// }
-	// }
+function onKeyDown(event) {
+	if(event.key == 'delete')
+	{
+		// if mouse is hovering over a pin, delete it
+	}
 }
-
 
 //clicking the button loads the next image
 document.getElementById("nextImage").onclick = loadNextImage;
 
-
-
 function loadNextImage() {
 	
+	//delete everything. Well, the info is stored in the JSON structures but visually it will disappear
 	pinLayer.removeChildren();
 	//switch to imageLayer since we're changing the image
 	imageLayer.activate();
@@ -190,7 +164,12 @@ function loadNextImage() {
 	}
 	else
 	{
-		img_number = 1;
+		//img_number = 1;
+		console.log("No more images, task complete!");
+		
+		// DO SOMETHING TO SHOW THAT THE TASK IS OVER
+		
+		return;
 	}
 	//load JavaScript image from source
 	img.src = img_directory + img_number + ".jpg";
@@ -203,9 +182,6 @@ function loadNextImage() {
 	img.remove();
 	
 	//position the raster
-	///raster.position.x = view.center.x;
-	//raster.position.y = view.center.y;
-	//raster.position.y = raster.height/2 + 10;
 	raster.position = new Point(450,350);
 	
 	//lower image opacity for better text visibility
@@ -213,6 +189,9 @@ function loadNextImage() {
 	
 	//revert back to pin layer
 	pinLayer.activate();
+	
+	//start new imageData Object in userReport array
+	userReport.push(new imageData(img_number));
 };
 
 function createPin(event) {
@@ -227,18 +206,25 @@ function createPin(event) {
 	pin.name = "pin";
 	pin.dragging = false;
 	
-	console.log("pin is drawn");
+	//console.log("pin is drawn");
 	
 	//group pin and text together
 	var objectLabel = new Group();
 	objectLabel.name = "objectLabel";
 	objectLabel.addChild(pin);
-	//objectLabel.addChild( makeTags(event,pin) );
-	console.log("Creating text box now");
+	
+	//start new objectData Object in this imageData's objects[] array
+	//oh god why is everything named 'object
+	userReport[img_number].objects.push(new objectData(event.point.x, event.point.y, objectLabel.id));
+	console.log("new object #" + userReport[img_number].objects.slice(-1)[0].objectId + " at (" + userReport[img_number].objects.slice(-1)[0].x + "," + userReport[img_number].objects.slice(-1)[0].y + ")");
+	objectLabel.objectIndex = userReport[img_number].objects.length - 1;
+	//console.log("Setting objectLabel.objectIndex to " + objectLabel.objectIndex);
+	
+	//console.log("Creating text box now");
 	zxcMakeTextBox(event, objectLabel);
 	
 	
-	console.log("group id: "+objectLabel.id);
+	//console.log("group id: "+objectLabel.id);
 	
 	//define pin behavior on mouseOver
 	pin.onMouseEnter = function(event) 
@@ -248,7 +234,7 @@ function createPin(event) {
 		
 		//grow pin to emphasize which one is selected and hint that it can be dragged
 		// this.scale(1.6);
-		console.log("hover");
+		//console.log("hover");
 		
 		//display text
 		if(objectLabel.children['text'])
@@ -259,7 +245,7 @@ function createPin(event) {
 	pin.onMouseLeave = function(event) 
 	{
 		// this.scale(0.625);
-		console.log("unhover");
+		//console.log("unhover");
 		
 		if(objectLabel.children['text'])
 		{
@@ -294,9 +280,9 @@ function zxcMakeTextBox(event, group){
 	
 	console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
 	
+	//set typing to TRUE to prevent user from creating new pins
 	typing = true;
-	var x = event.point.x;
-	var y = event.point.y;
+	
 	
   	zxcTextBox = document.createElement('INPUT'); 
   	zxcTextBox.type='text'; // same as create  <input  type="text" > in html
@@ -321,18 +307,23 @@ function zxcMakeTextBox(event, group){
     
     // press enter to finish typing
   	zxcTextBox.onkeydown = function(event){ 
-  		console.log ("before enter " + zxcTextBox.value);
-  		
-  		
-  		
+  		//console.log ("before enter " + zxcTextBox.value);  		
   		if (event.keyCode == '13')
   		{
-  			console.log("ENTER HAS BEEN PRESSED");
+  			///console.log("ENTER HAS BEEN PRESSED");
+  			userReport[img_number].objects.slice(-1)[0].name = zxcTextBox.value;
+  			console.log("Object number " + userReport[img_number].objects.slice(-1)[0].objectId + " is named " + userReport[img_number].objects.slice(-1)[0].name);
+  			
+  			var x = event.point.x;
+			var y = event.point.y;
   			group.addChild(makeTags(x, y, zxcTextBox.value));
-  			console.log("textGroup id =  " + group.id);
+  			
+  			// console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
   			//console.log("text: " + text);
   			this.style.visibility='hidden';
+  			
+  			//set typing back to FALSE to allow user to make pins again
   			typing = false; 
   		//	imageLayer.activate();
   		}
@@ -340,4 +331,4 @@ function zxcMakeTextBox(event, group){
    //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
    
-}
+};

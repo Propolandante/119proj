@@ -1,0 +1,31 @@
+// sample.json
+
+var imgData = {
+	"imageId" : 1,
+	"objects" : [
+		{
+			"x": 120,
+			"y": 200,
+			"name": "watermelon",
+			"objectId": 1
+		},
+		{
+			"x": 30,
+			"y": 90,
+			"name": "horse",
+			"objectId": 2	
+		},
+		{
+			"x": 305,
+			"y": 15,
+			"name": "battery",
+			"objectId": 3
+		},
+		{
+			"x": 140,
+			"y": 130,
+			"name": "staple",
+			"objectId": 4
+		}
+	]
+}
