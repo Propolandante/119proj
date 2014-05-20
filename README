@@ -1,0 +1,17 @@
+ATTENTION: The local files will not load in Chrome, because Chrome doesn't support multi-file web applications unless they are hosted over HTTP. Please use Firefox or use our Online version.
+
+This week we are submitting both Phase I and Phase II of our Visual Genome User Interface design. Ideally, Phase I would be released first, where users are only labelling the objects in each image. This data is collected from thousands of submissions to form a unified set of object labels for each image. While we haven't implemented any canonicalization solutions in  our project yet, we have some ideas for tackling it. 
+
+Users in Phase I click on an object in the image that they would like to label, and they are prompted with a text box right where they clicked. As they type in the label for the object, they are presented with label suggestions based on the letters they have typed so far. These suggestions can either be object names that the user has already submitted while labelling this image, or suggestions from a set of common objects that we have included. The user is still free to type whatever label they would like, but we feel that these suggestions will aid canonicalization as well as help avoid typos. By hovering over a pin, the user can see what the object's label is. To get rid of a pin, the user can Shift+click the pin, or drag it off of the image for disposal. Data from each pin (coordinates, name, unique id) are stored in a JSON data structure. We spent a long time trying to get communication with a web server to host this data, but we were unable to fully accomplish that by this week. We expect that this will be done by Friday. In our current build, the data is lost as soon as the user exits the web application. The user can click the Next Image button to continue through the ten images provided. 
+
+Users in Phase II are presented with an already-labelled image, and are tasked with identifying the relationships between the objects in the image. This is done by clicking and dragging a red arrow from one object pin to another. When the user does this they are asked to label the relationship between the objects. As with the object-labelling, the user is provided with auto-complete suggestions as they type. The relationships can be seen when the user hovers their mouse over an object, to reveal it's name as well as its relationships to any other objects in the image. Because these are directed relationships, the UI is not cluttered by the labels from two objects acting upon each other. Currently, our Phase II example only works with the one image provided. We hope to be able to demonstrate how the data from Phase I can be used in Phase II by Friday's submission.
+
+KNOWN BUGS / PLANNED TWEAKS
+
+- It is sometimes hard to read the text on top of the image. We have toyed around with opacity levels but have yet to find a good solution. It is likely that we will need to put some sort of backdrop behind the text to keep it legible at all times.
+- It is possible to create more than one relationship from one object to another. This causes overlapping and looks ugly.
+- Users who type fast have to press Enter twice to submit a label. This is because we prevent the user from continuing until the auto-correct box has shown up, in order to fix a bug where the auto-correct stays on screen. We are looking into a more elegant solution to this bug.
+
+GitHub Accounts:
+
+Derek Donahue: https://github.com/Propolandante Brittany West: https://github.com/bkwest Jiayu Zeng: https://github.com/huanghunz
