@@ -5,10 +5,6 @@ var img_number = 0;
 var img_count = 10; // total number of images in directory
 var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/images/";
 
-var normalOpacity = 0.85;
-var typingOpacity = 0.55;
-
-
 var raster; // image to be displayed
 
 var imageLayer = project.activeLayer;
@@ -54,7 +50,6 @@ function onMouseDown(event) {
 	
 	if(inBounds && !typing)
 	{
-	
 		for(i = 0; i < pins.length; i++)
 		{
 			if (pins[i].children['pin'].contains(event.point))
@@ -178,7 +173,6 @@ function loadNextImage() {
 	
 	if(raster != null) // if there is already an image
 	{
-		
 		raster.remove(); // remove it
 	}
 	
@@ -212,7 +206,7 @@ function loadNextImage() {
 	raster.position = new Point(450,350);
 	
 	//lower image opacity for better text visibility
-	raster.opacity = normalOpacity;
+	raster.opacity = 0.85;
 	
 	//revert back to pin layer
 	pinLayer.activate();
@@ -277,9 +271,7 @@ function makeTags(x, y, tagText){
 	//console.log ("path " + event.item);
 	//var fullname = prompt("Object name.", " ");
 	//zxcMakeTextBox(event.point.x, event.point.y);
-	
-	
-	raster.opacity = normalOpacity;
+    
 	var text = new PointText(x, y+25);
 	text.content = tagText;
 	
@@ -287,9 +279,7 @@ function makeTags(x, y, tagText){
 	{
 		userDefine.push(tagText);
 	}
-	//availableTags.push(tagText);
-	//console.log ("input? " + userDefine[0]);
-	
+
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
@@ -307,41 +297,47 @@ function makeTags(x, y, tagText){
 function zxcMakeTextBox(event, group){
 	
 	console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
-	raster.opacity = typingOpacity;
+	//raster.opacity = typingOpacity;
 	
 	typing = true;
 	var x = event.point.x;
 	var y = event.point.y;
   	
     var zxcTextBox = document.createElement('INPUT'); // "input" works also
+    zxcMakeTextBox.value = null;
 	$(zxcTextBox).attr({
     	'type': 'text',
     	'id': "tags",
-    	//'class': 'text-field'   --- can use another style that was set up in .css file
-   		// 'placeholder':"search", --- ghost string 
+    	'class': 'text-field valid',   //--- can use another style that was set up in .css file
+   		'placeholder':"what's the object?", //--- ghost string 
 	});
   	
   	var combine = sources.concat(userDefine);
-  
+ 
   	document.getElementsByTagName('BODY')[0].appendChild(zxcTextBox);
   
-    $('#tags').autocomplete({   //$('#tags').autocomplete works only after appending the text-box 
-		width: 200,
-		delimiter: /(,|;)\s*/,
-		lookup: combine
-		//lookup: placeholder for an array of customized object names
-		//lookup: 'another,way,to,use,lookup,'.split(',')
-	}); 
-    
-  	// ****** 
+  
+	$('#tags').autocomplete({ 
+  		source: function( request, response ) {
+    		var matches = $.map( combine, function(acItem) {
+      		if ( acItem.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) 
+      		{
+        		return acItem;
+       		}
+    		});
+    	response(matches);
+  		}
+	});
+	
+	
+  	//***** 
   	// codes about styles/css
-  	zxcTextBox.size=10;
   	zxcTextBox.style.position ='absolute';
   	zxcTextBox.style.left     = event.point.x+'px';
   	zxcTextBox.style.top      = event.point.y+'px';
-  	zxcTextBox.style.fontSize = (12)+'px';      
+  	//zxcTextBox.style.fontSize = (12)+'px';      
   	
-  	// ******
+  	// ****** */
   	
   	// after created, if the mouse is on the textbox, textbox will be highlighted
   	zxcTextBox.focus(); 
@@ -351,8 +347,12 @@ function zxcMakeTextBox(event, group){
   	zxcTextBox.onkeydown = function(event){ 
   		console.log ("before enter " + zxcTextBox.value);
   		
-  		if (event.keyCode == '13')
+  		if (event.keyCode == '13' )
   		{
+  			var input = zxcTextBox.value;
+  			if ( !input )
+  				return;
+  				
   			console.log("ENTER HAS BEEN PRESSED");
   			group.addChild(makeTags(x, y, zxcTextBox.value));
   			console.log("textGroup id =  " + group.id);
@@ -361,8 +361,9 @@ function zxcMakeTextBox(event, group){
   			//this.style.visibility='hidden';
   			this.parentElement.removeChild(this); // without removing child, the autocomplete thing will only work at the first time
   			typing = false; 
-  		
+
   		}
+  		
   	};
    //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }

@@ -1,25 +1,15 @@
 .text-field {
     -moz-box-sizing: border-box;
-    border: 5px solid #EEEEEE;
+    border: 0.5px solid 'blue';
     font-family: "Source Sans Pro",Arial,sans-serif;
-    font-size: 0.73684em;
+    font-size: 11pt;
     font-weight: 600;
-    height: 20px;
+    height: 30px;
     margin: 0;
-    padding: 5px;
-    width: 100%;
+    padding: 3px;
+    width: 200px; 
+    
 } 
 
-.autocomplete-suggestion {
-    overflow: visible;
-    padding: 2px 5px;
-    white-space: nowrap;
-    
-}
-.autocomplete-suggestions strong {
-    color: #FF7F50;
-    font-weight: normal;
-}
-.autocomplete-selected{
-  background:#F0F0F0;
-}
+
+ /* class is used in derk.js for text box */
