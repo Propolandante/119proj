@@ -298,7 +298,7 @@ function makeObjectTags(x, y, tagText){
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
-    	fontSize: 18,
+    	fontSize: 22,
     	fillColor: 'blue',
     	justification: 'center'
 	};
@@ -325,7 +325,7 @@ function makeRelTags(x, y, tagText){
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
-    	fontSize: 18,
+    	fontSize: 22,
     	fillColor: 'red',
     	justification: 'center'
 	};

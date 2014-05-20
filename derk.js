@@ -15,6 +15,8 @@ var userDefine = [];
 //load initial image in imageLayer
 loadNextImage();
 
+displayText();
+
 //switch to pinLayer for pin placement
 pinLayer.activate();
 
@@ -181,6 +183,32 @@ function onKeyDown(event) {
 
 //clicking the button loads the next image
 document.getElementById("nextImage").onclick = loadNextImage;
+
+function displayText() {
+	
+	imageLayer.activate();
+	
+	var title = new PointText(new Point(450, 40));
+	title.content = "Phase I - Label All Objects";
+	
+	title.style = {
+    	fontFamily: 'Helvetica',
+    	fontWeight: 'bold',
+    	fontSize: 40,
+    	fillColor: 'blue',
+    	justification: 'center'
+	};
+	
+	var instr = new PointText(new Point(450, 670));
+	instr.content = "Click on an object to label it. Click and drag labels to move them around.\nTo delete a label, drag it off of the image. When you're finished, click the Next Image button to proceed.";
+	
+	instr.style = {
+    	fontFamily: 'Helvetica',
+    	fontSize: 16,
+    	fillColor: 'blue',
+    	justification: 'center'
+	};
+}
 
 function loadNextImage() {
 	
