@@ -5,6 +5,8 @@ var img_number = 0;
 var img_count = 10; // total number of images in directory
 var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/images/";
 
+var normalOpacity = 0.85;
+var typingOpacity = 0.55;
 
 
 var raster; // image to be displayed
@@ -12,6 +14,7 @@ var raster; // image to be displayed
 var imageLayer = project.activeLayer;
 var pinLayer = new Layer(); // all pins and text labels go in this label
 
+var userDefine = [];
 //load initial image in imageLayer
 loadNextImage();
 
@@ -209,7 +212,7 @@ function loadNextImage() {
 	raster.position = new Point(450,350);
 	
 	//lower image opacity for better text visibility
-	raster.opacity = 0.85;
+	raster.opacity = normalOpacity;
 	
 	//revert back to pin layer
 	pinLayer.activate();
@@ -275,8 +278,18 @@ function makeTags(x, y, tagText){
 	//var fullname = prompt("Object name.", " ");
 	//zxcMakeTextBox(event.point.x, event.point.y);
 	
+	
+	raster.opacity = normalOpacity;
 	var text = new PointText(x, y+25);
 	text.content = tagText;
+	
+	if (sources.indexOf(tagText) == -1 && userDefine.indexOf(tagText) == -1)
+	{
+		userDefine.push(tagText);
+	}
+	//availableTags.push(tagText);
+	//console.log ("input? " + userDefine[0]);
+	
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
@@ -290,24 +303,39 @@ function makeTags(x, y, tagText){
 	return text;
 };
 
+
 function zxcMakeTextBox(event, group){
 	
 	console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
+	raster.opacity = typingOpacity;
 	
 	typing = true;
 	var x = event.point.x;
 	var y = event.point.y;
-	
-  	zxcTextBox = document.createElement('INPUT'); 
-  	zxcTextBox.type='text'; // same as create  <input  type="text" > in html
   	
-  	zxcTextBox.size=10;
+    var zxcTextBox = document.createElement('INPUT'); // "input" works also
+	$(zxcTextBox).attr({
+    	'type': 'text',
+    	'id': "tags",
+    	//'class': 'text-field'   --- can use another style that was set up in .css file
+   		// 'placeholder':"search", --- ghost string 
+	});
   	
+  	var combine = sources.concat(userDefine);
+  
   	document.getElementsByTagName('BODY')[0].appendChild(zxcTextBox);
-  	
+  
+    $('#tags').autocomplete({   //$('#tags').autocomplete works only after appending the text-box 
+		width: 200,
+		delimiter: /(,|;)\s*/,
+		lookup: combine
+		//lookup: placeholder for an array of customized object names
+		//lookup: 'another,way,to,use,lookup,'.split(',')
+	}); 
+    
   	// ****** 
   	// codes about styles/css
-  	
+  	zxcTextBox.size=10;
   	zxcTextBox.style.position ='absolute';
   	zxcTextBox.style.left     = event.point.x+'px';
   	zxcTextBox.style.top      = event.point.y+'px';
@@ -323,8 +351,6 @@ function zxcMakeTextBox(event, group){
   	zxcTextBox.onkeydown = function(event){ 
   		console.log ("before enter " + zxcTextBox.value);
   		
-  		
-  		
   		if (event.keyCode == '13')
   		{
   			console.log("ENTER HAS BEEN PRESSED");
@@ -332,9 +358,10 @@ function zxcMakeTextBox(event, group){
   			console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
   			//console.log("text: " + text);
-  			this.style.visibility='hidden';
+  			//this.style.visibility='hidden';
+  			this.parentElement.removeChild(this); // without removing child, the autocomplete thing will only work at the first time
   			typing = false; 
-  		//	imageLayer.activate();
+  		
   		}
   	};
    //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
