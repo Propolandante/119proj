@@ -81,6 +81,12 @@ function onMouseDown(event) {
 		 	// console.log("id check: " + draggingPin.id + " vs " + closestPin.id);
 		 	// console.log("draggingPin selected, object ID is " + draggingPin.id);
 		 	
+		 	//If holding SHIFT, delete this pin
+		 	if (event.modifiers.shift)
+			{
+				draggingPin.remove();
+			}
+		 	
 		 	closestPin = null; // reset closestPin (might be unnecessary)
 		 	sd = 10000; // reset the shortest distance (might be unnecessary)
 		 }
@@ -293,6 +299,8 @@ function zxcMakeTextBox(event, group){
 	
 	var x = event.point.x;
 	var y = event.point.y;
+	
+	var popUp = false;
   	
     var zxcTextBox = document.createElement('INPUT'); // "input" works also
     zxcMakeTextBox.value = null;
@@ -313,8 +321,9 @@ function zxcMakeTextBox(event, group){
   	
   	document.getElementsByTagName('BODY')[0].appendChild(zxcTextBox);
   	
-  	$('#tags').autocomplete({ 
+  	var t = $('#tags').autocomplete({ 
   		source: function( request, response ) {
+  			popUp = true;
     		var matches = $.map( combine, function(acItem) {
       		if ( acItem.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) 
       		{
@@ -331,7 +340,7 @@ function zxcMakeTextBox(event, group){
   	zxcTextBox.style.position ='absolute';
   	zxcTextBox.style.left     = event.point.x+'px';
   	zxcTextBox.style.top      = event.point.y+'px';
-  	zxcTextBox.style.fontSize = (12)+'px';      
+  	//zxcTextBox.style.fontSize = (12)+'px';      
   	
   	// ******
   	
@@ -344,6 +353,18 @@ function zxcMakeTextBox(event, group){
   		//console.log ("before enter " + zxcTextBox.value);  		
   		if (event.keyCode == '13')
   		{
+  			
+  			var input = zxcTextBox.value;
+  			
+  			//if there is nothing typed, or if the popUp hasn't had a chance to load
+  			if ( !input || !popUp )
+  			{
+  				//do nothing
+  				return;
+  			}
+  			
+  			popUp = false;
+  			
   			///console.log("ENTER HAS BEEN PRESSED");
   			userReport[img_number].objects.slice(-1)[0].name = zxcTextBox.value;
   			console.log("Object number " + userReport[img_number].objects.slice(-1)[0].objectId + " is named " + userReport[img_number].objects.slice(-1)[0].name);
@@ -354,7 +375,11 @@ function zxcMakeTextBox(event, group){
   			//text = zxcTextBox.value;
   			//console.log("text: " + text);
   			//this.style.visibility='hidden';
+  			
+  			$('#tags').autocomplete("close");
+  			
   			this.parentElement.removeChild(this);
+  			
   			
   			//set typing back to FALSE to allow user to make pins again
   			typing = false; 
