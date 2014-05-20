@@ -22,6 +22,8 @@ loadNextImage();
 //load pins from JSON data to display over image
 loadPins();
 
+displayText();
+
 relationshipLayer.activate();
 
 function imageRelationshipData(id)
@@ -141,6 +143,32 @@ function onMouseUp(event) {
 
 //clicking the button loads the next image
 document.getElementById("nextImage").onclick = loadNextImage;
+
+function displayText() {
+	
+	imageLayer.activate();
+	
+	var title = new PointText(new Point(450, 40));
+	title.content = "Phase II - Label All Relationships";
+	
+	title.style = {
+    	fontFamily: 'Helvetica',
+    	fontWeight: 'bold',
+    	fontSize: 40,
+    	fillColor: 'blue',
+    	justification: 'center'
+	};
+	
+	var instr = new PointText(new Point(450, 670));
+	instr.content = "Click and drag an arrow from one object to another to label a relationship. This demonstration only has one example image.\nData collected from Phase I will be used as object data in Phase II.";
+	
+	instr.style = {
+    	fontFamily: 'Helvetica',
+    	fontSize: 16,
+    	fillColor: 'blue',
+    	justification: 'center'
+	};
+}
 
 function loadNextImage() {
 	
@@ -422,7 +450,7 @@ function zxcMakeTextBox(group){
     	'type': 'text',
     	'id': "tags",
     	'class': 'text-field valid',   //--- can use another style that was set up in .css file
-   		'placeholder':"what's the object?", //--- ghost string 
+   		'placeholder':"what's the relationship?", //--- ghost string 
 	});
   	
   	var combine = sources.concat(userDefine);
