@@ -315,7 +315,7 @@ function makeTags(x, y, tagText){
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
-    	fontSize: 18,
+    	fontSize: 22,
     	fillColor: 'blue',
     	justification: 'center'
 	};
