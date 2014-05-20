@@ -10,6 +10,7 @@ var imageLayer = project.activeLayer; // this layer holds the raster
 var pinLayer = new Layer(); // all pins and text labels go in this label
 var typing = false; // true if text box is active (nothing else should happen until this is false again)
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
+var userDefine = [];
 
 //load initial image in imageLayer
 loadNextImage();
@@ -263,6 +264,13 @@ function makeTags(x, y, tagText){
 	
 	var text = new PointText(x, y+25);
 	text.content = tagText;
+	
+	if (sources.indexOf(tagText) == -1 && userDefine.indexOf(tagText) == -1)
+	{
+		userDefine.push(tagText);
+	}
+
+	
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
@@ -283,13 +291,39 @@ function zxcMakeTextBox(event, group){
 	//set typing to TRUE to prevent user from creating new pins
 	typing = true;
 	
-	
-  	zxcTextBox = document.createElement('INPUT'); 
-  	zxcTextBox.type='text'; // same as create  <input  type="text" > in html
+	var x = event.point.x;
+	var y = event.point.y;
   	
-  	zxcTextBox.size=10;
+    var zxcTextBox = document.createElement('INPUT'); // "input" works also
+    zxcMakeTextBox.value = null;
+	$(zxcTextBox).attr({
+    	'type': 'text',
+    	'id': "tags",
+    	'class': 'text-field valid',   //--- can use another style that was set up in .css file
+   		'placeholder':"what's the object?", //--- ghost string 
+	});
+  	
+  	var combine = sources.concat(userDefine);
+ 
+	
+  	// zxcTextBox = document.createElement('INPUT'); 
+  	// zxcTextBox.type='text'; // same as create  <input  type="text" > in html
+  	
+  	// zxcTextBox.size=10;
   	
   	document.getElementsByTagName('BODY')[0].appendChild(zxcTextBox);
+  	
+  	$('#tags').autocomplete({ 
+  		source: function( request, response ) {
+    		var matches = $.map( combine, function(acItem) {
+      		if ( acItem.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) 
+      		{
+        		return acItem;
+       		}
+    		});
+    	response(matches);
+  		}
+	});
   	
   	// ****** 
   	// codes about styles/css
@@ -314,14 +348,13 @@ function zxcMakeTextBox(event, group){
   			userReport[img_number].objects.slice(-1)[0].name = zxcTextBox.value;
   			console.log("Object number " + userReport[img_number].objects.slice(-1)[0].objectId + " is named " + userReport[img_number].objects.slice(-1)[0].name);
   			
-  			var x = event.point.x;
-			var y = event.point.y;
   			group.addChild(makeTags(x, y, zxcTextBox.value));
   			
   			// console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
   			//console.log("text: " + text);
-  			this.style.visibility='hidden';
+  			//this.style.visibility='hidden';
+  			this.parentElement.removeChild(this);
   			
   			//set typing back to FALSE to allow user to make pins again
   			typing = false; 
