@@ -56,6 +56,8 @@ function onMouseDown(event) {
 	
 	if(inBounds && !typing)
 	{
+		//console.log("pins: " + pins.length);
+		
 		for(i = 0; i < pins.length; i++)
 		{
 			if (pins[i].children['pin'].contains(event.point))
@@ -84,7 +86,15 @@ function onMouseDown(event) {
 		 	//If holding SHIFT, delete this pin
 		 	if (event.modifiers.shift)
 			{
+				//nullify JSON data for this pin
+				//NOTE: we can not delete this JSON data since it is in the middle of the array,
+				//and deleting it would mess up all of the objectIndex values. Instead it will be 
+				//set to null and skipped later on.
+				userReport[img_number].objects[draggingPin.objectIndex] = null;
+				
+				//remove the pin entirely
 				draggingPin.remove();
+				draggingPin = null;
 			}
 		 	
 		 	closestPin = null; // reset closestPin (might be unnecessary)
@@ -99,8 +109,18 @@ function onMouseDown(event) {
 
 function onMouseUp(event) {
 	
+	var inBounds = false;
+	
+	//check to make sure mouse is within the image boundaries	
+	
+	if(raster.contains(event.point))
+	{
+		inBounds = true;
+	}
+	
+	
 	//if I was dragging a pin before, that pin is no longer DRAGGING
-	if(draggingPin)
+	if(draggingPin && inBounds)
 	{
 		//update JSON coordinate info for dragged pin
 		
@@ -115,6 +135,21 @@ function onMouseUp(event) {
 		//this pin is no longer being dragged
 		draggingPin.dragging = false;
 		//we are no longer dragging a pin
+		draggingPin = null;
+	}
+	else if (draggingPin && !inBounds)
+	{
+		console.log("Since it was dragged off the image, we are deleting everything about pin " + draggingPin.id);
+		
+		//nullify JSON data for this pin
+		//NOTE: we can not delete this JSON data since it is in the middle of the array,
+		//and deleting it would mess up all of the objectIndex values. Instead it will be 
+		//set to null and skipped later on.
+		userReport[img_number].objects[draggingPin.objectIndex] = null;
+		
+		//remove the pin entirely
+		draggingPin.remove();
+		
 		draggingPin = null;
 	}
 	
@@ -354,10 +389,36 @@ function zxcMakeTextBox(event, group){
   		if (event.keyCode == '13')
   		{
   			
+  			console.log("ENTER HAS BEEN PRESSED");
+  			
   			var input = zxcTextBox.value;
   			
-  			//if there is nothing typed, or if the popUp hasn't had a chance to load
-  			if ( !input || !popUp )
+  			//if the user pressed ENTER without typing anything
+  			if (!input)
+  			{
+  				console.log("Since nothing was typed in the text box, we are deleting everything about this pin:");
+  				
+  				//delete the pin JSON data
+  				userReport[img_number].objects.pop();
+  				console.log("JSON data (hopefully) deleted.");
+  				
+  				//as well as the pin and objectLabel group!
+  				group.remove();
+  				console.log("objectLabel group and children (hopefully) removed.");
+  				
+  				popUp = false;
+  				
+  				$('#tags').autocomplete("close");
+  			
+	  			this.parentElement.removeChild(this);
+	  			
+	  			//set typing back to FALSE to allow user to make pins again
+	  			typing = false; 
+  			}
+  			
+  			
+  			//if the popUp hasn't had a chance to load
+  			else if ( !popUp )
   			{
   				//do nothing
   				return;
@@ -365,7 +426,6 @@ function zxcMakeTextBox(event, group){
   			
   			popUp = false;
   			
-  			///console.log("ENTER HAS BEEN PRESSED");
   			userReport[img_number].objects.slice(-1)[0].name = zxcTextBox.value;
   			console.log("Object number " + userReport[img_number].objects.slice(-1)[0].objectId + " is named " + userReport[img_number].objects.slice(-1)[0].name);
   			
