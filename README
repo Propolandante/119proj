@@ -1,3 +1,7 @@
+http://people.ucsc.edu/~djdonahu/119proj_2/
+
+https://github.com/Propolandante/119proj
+
 ATTENTION: The local files will not load in Chrome, because Chrome doesn't support multi-file web applications unless they are hosted over HTTP. Please use Firefox or use our Online version.
 
 This week we are submitting both Phase I and Phase II of our Visual Genome User Interface design. Ideally, Phase I would be released first, where users are only labelling the objects in each image. This data is collected from thousands of submissions to form a unified set of object labels for each image. While we haven't implemented any canonicalization solutions in  our project yet, we have some ideas for tackling it. 
@@ -11,6 +15,13 @@ KNOWN BUGS / PLANNED TWEAKS
 - It is sometimes hard to read the text on top of the image. We have toyed around with opacity levels but have yet to find a good solution. It is likely that we will need to put some sort of backdrop behind the text to keep it legible at all times.
 - It is possible to create more than one relationship from one object to another. This causes overlapping and looks ugly.
 - Users who type fast have to press Enter twice to submit a label. This is because we prevent the user from continuing until the auto-correct box has shown up, in order to fix a bug where the auto-correct stays on screen. We are looking into a more elegant solution to this bug.
+- When hovering over an object in Phase II, it displays the object's name, and it's relationships to other objects, but not the names of the objects it is acting upon. This will be fixed.
+- The overall look of the webpage is pretty flat and boring. We wanted to spend some time to make it more appealing looking, but all of that time went into attempting to set up an AWS server to host JSON data.
+- Users are able to draw multiple relationships without typing a label for them, clogging up the screen.
+- The description for Phase II is kind of vague to anyone not familiar with the project.
+- The Next Image button is broken in Phase II. THis is because there is only one image right now.
+
+We welcome any feedback!
 
 GitHub Accounts:
 
