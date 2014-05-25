@@ -15,6 +15,7 @@ var vector; // this is the vector the user draws with
 var vectorStart, vectorPrevious;
 var vectorItem;
 var drawingRelFrom = null;
+var startPt = null;
 
 //load initial image in imageLayer
 loadNextImage();
@@ -67,6 +68,10 @@ function onMouseDown(event) {
 					
 					sd = event.point.getDistance(pins[i].children['pin'].position);
 					closestPin = pins[i];
+					startPt = pins[i].children['pin'] ;
+					startPt.strokeColor = 'yellow';
+					startPt.strokeWidth = 3;
+					
 				}
 			}
 		}
@@ -82,6 +87,12 @@ function onMouseDown(event) {
 		 	closestPin = null; // reset closestPin (might be unnecessary)
 		 	sd = 10000; // reset the shortest distance (might be unnecessary)
 		 }
+		 else
+		 {
+		 	startPt.strokeColor = 'yellow';
+			startPt.strokeWidth = 3;
+		 	console.log (" there is no pin under mouse's position ");
+		 }
 	}
 	
 }
@@ -93,6 +104,13 @@ function onMouseDrag(event) {
 }
 
 function onMouseUp(event) {
+	
+	if (startPt)
+	{
+		startPt.strokeColor = 'black';
+		startPt.strokeWidth = 1;
+		//startPt = null;
+	}
 	
 	//check to see if user dragged to ANOTHER pin
 	
@@ -386,7 +404,7 @@ function drawVector(drag) {
 			end + arrowVector.rotate(-135)
 		])
 	]);
-	vectorItem.strokeWidth = 2;
+	vectorItem.strokeWidth = 5;
 	vectorItem.strokeColor = '#e4141b';
 	
 }
@@ -442,8 +460,7 @@ function zxcMakeTextBox(group){
 	var x = vectorStart.x + (vector.x / 2);
 	var y = vectorStart.y + (vector.y / 2);
 	
-	var popUp = false;
-  	
+  	var textBoxClosed = false;
     var zxcTextBox = document.createElement('INPUT'); // "input" works also
     zxcMakeTextBox.value = null;
 	$(zxcTextBox).attr({
@@ -465,13 +482,15 @@ function zxcMakeTextBox(group){
   	
   	var t = $('#tags').autocomplete({ 
   		source: function( request, response ) {
-  			popUp = true;
-    		var matches = $.map( combine, function(acItem) {
-      		if ( acItem.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) 
-      		{
-        		return acItem;
-       		}
-    		});
+  			if (!textBoxClosed ) // if the textBox is closed, autocomplete will not be executed
+  			{
+    			var matches = $.map( combine, function(acItem) {
+      				if ( acItem.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) 
+      				{
+        				return acItem;
+       				}
+    			});
+  			}
     	response(matches);
   		}
 	});
@@ -495,7 +514,7 @@ function zxcMakeTextBox(group){
   		//console.log ("before enter " + zxcTextBox.value);  		
   		if (event.keyCode == '13')
   		{
-  			
+  			textBoxClosed = true;
   			// console.log("ENTER HAS BEEN PRESSED");
   			
   			var input = zxcTextBox.value;
@@ -513,8 +532,6 @@ function zxcMakeTextBox(group){
   				group.remove();
   				// console.log("objectLabel group and children (hopefully) removed.");
   				
-  				popUp = false;
-  				
   				$('#tags').autocomplete("close");
   			
 	  			this.parentElement.removeChild(this);
@@ -525,13 +542,6 @@ function zxcMakeTextBox(group){
   			
   			
   			//if the popUp hasn't had a chance to load
-  			else if ( !popUp )
-  			{
-  				//do nothing
-  				return;
-  			}
-  			
-  			popUp = false;
   			
   			userReport[img_number].relationships.slice(-1)[0].text = zxcTextBox.value;
   			console.log(userReport[img_number].relationships.slice(-1)[0].from_name + " is " + userReport[img_number].relationships.slice(-1)[0].text + " " + userReport[img_number].relationships.slice(-1)[0].to_name);
