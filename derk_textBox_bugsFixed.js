@@ -12,6 +12,7 @@ var typing = false; // true if text box is active (nothing else should happen un
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 
+
 //load initial image in imageLayer
 loadNextImage();
 
@@ -42,6 +43,7 @@ function onMouseDown(event) {
 	
 	var inBounds = false;
 	
+	
 	//check to make sure click is within the image boundaries	
 	
 	if(raster.contains(event.point))
@@ -52,6 +54,8 @@ function onMouseDown(event) {
 	//check to see if the click is on a pin
 		
 	var pins = pinLayer.children;
+	
+	
 	
 	var sd = 100000; // shortest distance
 	var closestPin = null;
@@ -188,9 +192,6 @@ function displayText() {
 	
 	imageLayer.activate();
 	
-	
-	
-	
 	var title = new PointText(new Point(450, 40));
 	title.content = "Phase I - Label All Objects";
 	
@@ -221,17 +222,14 @@ function loadNextImage() {
 	imageLayer.activate();
 	
 	var textBox = document.getElementById('tags');
-
 	if ( textBox )
 	{
 		typing = false;
 		textBox.parentElement.removeChild(textBox);
 	}
 		
-	
 	if(raster != null) // if there is already an image
 	{
-		
 		raster.remove(); // remove it
 	}
 	
@@ -295,6 +293,7 @@ function createPin(event) {
 	objectLabel.name = "objectLabel";
 	objectLabel.addChild(pin);
 	
+	
 	//start new objectData Object in this imageData's objects[] array
 	//oh god why is everything named 'object
 	userReport[img_number].objects.push(new objectData(event.point.x, event.point.y, objectLabel.id));
@@ -304,7 +303,6 @@ function createPin(event) {
 	
 	//console.log("Creating text box now");
 	zxcMakeTextBox(event, objectLabel);
-	
 	
 	//console.log("group id: "+objectLabel.id);
 	
@@ -318,24 +316,31 @@ function createPin(event) {
 		// this.scale(1.6);
 		//console.log("hover");
 		
+	
 		//display text
-		if(objectLabel.children['text'])
+		if( objectLabel.children['text'] )
 		{
 			objectLabel.children['text'].visible = true;
+		    objectLabel.children['rect'].visible = true;
+			
 		}
 	};
 	pin.onMouseLeave = function(event) 
 	{
 		// this.scale(0.625);
 		//console.log("unhover");
-		
+	
+  		
 		if(objectLabel.children['text'])
 		{
 			objectLabel.children['text'].visible = false;
+			objectLabel.children['rect'].visible = false;
+		
 		}
 	};
 	
 	pin.selected = false;
+	
 };
 
 function makeTags(x, y, tagText){
@@ -343,23 +348,28 @@ function makeTags(x, y, tagText){
 	//var fullname = prompt("Object name.", " ");
 	//zxcMakeTextBox(event.point.x, event.point.y);
 	
-	var text = new PointText(x, y+25);
+
+	var text = new PointText(x, y + 25);
 	text.content = tagText;
+	text.data.home = tagText;
 	
+
 	if (sources.indexOf(tagText) == -1 && userDefine.indexOf(tagText) == -1)
 	{
 		userDefine.push(tagText);
 	}
 
-	
 	text.style = {
     	fontFamily: 'Courier New',
     	fontWeight: 'bold',
     	fontSize: 22,
     	fillColor: 'blue',
-    	justification: 'center'
+    	justification: 'center',
+    	/// ---- add strok letting the string stands up
+    	//strokeColor: 'red',
+    	//strokeWidth: 1,
 	};
-	text.visible = false;
+	//text.visible = false; /// ---- so that the text will show up right after enter key is pressed
 	text.name = "text";
 	
 	return text;
@@ -404,7 +414,7 @@ function zxcMakeTextBox(event, group){
 	// then calls .map again, search for the next string
 	// after all matching strings are found (go through combined array), calls response function
 	// to finish autocomplete.
-  	
+  
   	var t = $('#tags').autocomplete({ 
   		source: function( request, response ) {
   			if (!textBoxClosed ) // if the textBox is closed, autocomplete will not be executed
@@ -457,7 +467,6 @@ function zxcMakeTextBox(event, group){
   				group.remove();
   				// console.log("objectLabel group and children (hopefully) removed.");
   				
-  			//	popUp = false;
   				
   				$('#tags').autocomplete("close");
   			
@@ -473,6 +482,19 @@ function zxcMakeTextBox(event, group){
   			
   			group.addChild(makeTags(x, y, zxcTextBox.value));
   			
+		  	var from = new Point(group.children['pin'].position.x-group.children['text'].data.home.length*8, 
+		  	                     group.children['pin'].position.y+8);
+			var to   = new Point(group.children['pin'].position.x+group.children['text'].data.home.length*8, 
+			                   group.children['pin'].position.y+30);
+			var rect = new Path.Rectangle(from, to);
+		//	var path = new Path.Rectangle(rect);
+			rect.fillColor = 'red';
+			rect.blendMode = 'luminosity';
+			rect.name = 'rect';
+			
+			group.addChild(rect);
+		
+  		
   			// console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
   			//console.log("text: " + text);
@@ -487,7 +509,13 @@ function zxcMakeTextBox(event, group){
   			typing = false; 
   		//	imageLayer.activate();
   		}
+  		
+  			console.log ( "---" + group.children['pin'].position.x + "   " + group.children['pin'].position.y);
+  		//	if (objectLabel.children['text'])
+  			
   	};
+  	
+  	
    //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
    
