@@ -11,6 +11,8 @@ var pinLayer = new Layer(); // all pins and text labels go in this label
 var typing = false; // true if text box is active (nothing else should happen until this is false again)
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
+var minRequired = 5;
+//var objectCount = 0; // how many actual pins on image, since we can't completely remove deleted pins
 
 
 //load initial image in imageLayer
@@ -157,6 +159,7 @@ function onMouseUp(event) {
 		draggingPin.remove();
 		
 		draggingPin = null;
+		checkMinimum(); // check to see if button can be enabled
 	}
 	
 };
@@ -265,6 +268,7 @@ function displayText() {
 	};
 }
 
+
 function loadNextImage() {
 	
 	//delete everything. Well, the info is stored in the JSON structures but visually it will disappear
@@ -323,6 +327,8 @@ function loadNextImage() {
 	
 	//start new imageData Object in userReport array
 	userReport.push(new imageData(img_number));
+	
+	$('#nextImage').attr('disabled', 'disabled');
 };
 
 function createPin(event) {
@@ -502,6 +508,7 @@ function zxcMakeTextBox(event, group){
   			
   			group.addChild(makeTags(x, y, zxcTextBox.value));
   			
+  			
 		  	var from = new Point(group.children['pin'].position.x-group.children['text'].data.home.length*8, 
 		  	                     group.children['pin'].position.y+8);
 			var to   = new Point(group.children['pin'].position.x+group.children['text'].data.home.length*8, 
@@ -513,7 +520,8 @@ function zxcMakeTextBox(event, group){
 			rect.name = 'rect';
 			
 			group.addChild(rect);
-		
+			
+			checkMinimum(); // check to see if button can be enabled
   		
   			// console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
@@ -540,3 +548,23 @@ function zxcMakeTextBox(event, group){
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
    
 };
+
+function checkMinimum() {
+	//var i;
+	// for(i = 0; i < userReport[img_number].objects.length(); i++) {
+		// if ( userReport[img_number].objects[i] != null ) {
+			// objectCount += 1;
+		// }
+	// }
+	
+	//objectCount
+	if(pinLayer.children.length < minRequired) {
+		$('#nextImage').attr('disabled', 'disabled');
+		console.log("num pins: " + pinLayer.children.length + " < " + "minReq: " + minRequired );
+		console.log("button is disabled");
+	} else {
+		$('#nextImage').removeAttr('disabled');
+		console.log("num pins: " + pinLayer.children.length + " > " + "minReq: " + minRequired );
+		console.log("button is enabled");
+	}
+}
