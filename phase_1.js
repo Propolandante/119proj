@@ -178,6 +178,57 @@ function onMouseMove(event) {
 			console.log("Uh, oh, draggingPin isn't dragging!");
 		}
 	}
+	else
+	{
+		//check to see if we are hovering over an existing pin
+		var pins = pinLayer.children;
+		var sd = 10000;
+		var lastIndex = null;
+		var closestPin = null;
+		
+		for(i = 0; i < pins.length; i++)
+		{
+			//if we are hovering over this pin
+			if (pins[i].children['pin'].contains(event.point))
+			{
+				// check to see if it is the closest pin (we don't want to highlight two pins at once)
+				if (event.point.getDistance(pins[i].children['pin'].position) < sd)
+				{
+					// if we are overwriting a pin that used to be the closest one
+					if(lastIndex)
+					{
+						//hide the text of the last pin
+						pins[lastIndex].children['text'].visible = false;
+		    			pins[lastIndex].children['rect'].visible = false;
+					}
+					
+					// mark the current pin to be the closest one
+					sd = event.point.getDistance(pins[i].children['pin'].position);
+					closestPin = pins[i];
+					//remember what index this is at, in case we need to hide the text later
+					lastIndex = i;
+				}
+			}
+			//if we are NOT hovering over this pin
+			else
+			{
+				//hide text of this pin
+				pins[i].children['text'].visible = false;
+		    	pins[i].children['rect'].visible = false;
+			}
+		}
+		if(closestPin) //if there is a pin, then this pin is now DRAGGING
+		{
+		 	closestPin.bringToFront();
+		 	
+		 	//show text of this pin
+			closestPin.children['text'].visible = true;
+	    	closestPin.children['rect'].visible = true;
+		 	
+		 	closestPin = null; // reset closestPin (might be unnecessary)
+		 	sd = 10000; // reset the shortest distance (might be unnecessary)
+		 }
+	}
 }
 
 function onKeyDown(event) {
@@ -335,38 +386,7 @@ function createPin(event) {
 	
 	//console.log("group id: "+objectLabel.id);
 	
-	//define pin behavior on mouseOver
-	pin.onMouseEnter = function(event) 
-	{
-		//bring pin to front in case of overlap
-		objectLabel.bringToFront();
-		
-		//grow pin to emphasize which one is selected and hint that it can be dragged
-		// this.scale(1.6);
-		//console.log("hover");
-		
 	
-		//display text
-		if( objectLabel.children['text'] )
-		{
-			objectLabel.children['text'].visible = true;
-		    objectLabel.children['rect'].visible = true;
-			
-		}
-	};
-	pin.onMouseLeave = function(event) 
-	{
-		// this.scale(0.625);
-		//console.log("unhover");
-	
-  		
-		if(objectLabel.children['text'])
-		{
-			objectLabel.children['text'].visible = false;
-			objectLabel.children['rect'].visible = false;
-		
-		}
-	};
 	
 	pin.selected = false;
 	
