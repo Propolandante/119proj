@@ -12,6 +12,8 @@ var typing = false; // true if text box is active (nothing else should happen un
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 var minRequired = 5;
+var color_list = ['red', 'blue', 'green'];
+var obj_name_list = [];
 //var objectCount = 0; // how many actual pins on image, since we can't completely remove deleted pins
 
 
@@ -36,6 +38,7 @@ function objectData(x,y,id)
 	this.y = y;
 	this.objectId = id;
 	this.name = "";
+    this.color = "";
 }
 
 
@@ -279,16 +282,15 @@ function loadNextImage() {
 	
 	$('#nextImage').attr('disabled', 'disabled');
 };
-
 function createPin(event) {
 	var pinSize = 7;
 	var pin = new Path.Circle(event.point, pinSize);
 	
 	//console.log("pin radius: "+pin.radius);
-	
+    	
 	// set pin colors
 	pin.strokeColor = 'black';
-	pin.fillColor = 'blue';
+	pin.fillColor = getRandomColor(); 
 	pin.name = "pin";
 	pin.dragging = false;
 	
@@ -298,6 +300,7 @@ function createPin(event) {
 	var objectLabel = new Group();
 	objectLabel.name = "objectLabel";
 	objectLabel.addChild(pin);
+
 	
 	
 	//start new objectData Object in this imageData's objects[] array
@@ -346,7 +349,6 @@ function createPin(event) {
 	};
 	
 	pin.selected = false;
-	
 };
 
 function makeTags(x, y, tagText){
@@ -382,7 +384,6 @@ function makeTags(x, y, tagText){
 };
 
 function zxcMakeTextBox(event, group){
-	
 	// console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
 	
 	//set typing to TRUE to prevent user from creating new pins
@@ -457,9 +458,20 @@ function zxcMakeTextBox(event, group){
   		{
   			textBoxClosed = true;
   			// console.log("ENTER HAS BEEN PRESSED");
-  			
+  		    	
   			var input = zxcTextBox.value;
-  			
+            obj_name_list.push(input);
+
+            var pinGroups = pinLayer.children;
+            for(var i=0; i<pinGroups.length; i++) {
+                if(pinGroups[i].id == group.id) {
+                   break;
+                }
+                if (pinGroups[i].children['text'].content == input) {
+                   group.children['pin'].fillColor = pinGroups[i].children['pin'].fillColor;
+                }
+            }
+            console.log(getRandomColor());
   			//if the user pressed ENTER without typing anything
   			if (!input)
   			{
@@ -523,7 +535,6 @@ function zxcMakeTextBox(event, group){
   			
   	};
   	
-  	
    //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
    
@@ -547,4 +558,13 @@ function checkMinimum() {
 		console.log("num pins: " + pinLayer.children.length + " > " + "minReq: " + minRequired );
 		console.log("button is enabled");
 	}
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
