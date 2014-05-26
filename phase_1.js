@@ -198,9 +198,13 @@ function onMouseMove(event) {
 					// if we are overwriting a pin that used to be the closest one
 					if(lastIndex)
 					{
-						//hide the text of the last pin
-						pins[lastIndex].children['text'].visible = false;
-		    			pins[lastIndex].children['rect'].visible = false;
+						if(pins[lastIndex].children['text'])
+						{
+					 		//hide text of this pin
+							pins[lastIndex].children['text'].visible = false;
+					    	pins[lastIndex].children['rect'].visible = false;
+					 	
+					 	}
 					}
 					
 					// mark the current pin to be the closest one
@@ -213,18 +217,27 @@ function onMouseMove(event) {
 			//if we are NOT hovering over this pin
 			else
 			{
-				//hide text of this pin
-				pins[i].children['text'].visible = false;
-		    	pins[i].children['rect'].visible = false;
+				if(pins[i].children['text'])
+			 	{
+			 		//hide text of this pin
+					pins[i].children['text'].visible = false;
+			    	pins[i].children['rect'].visible = false;
+			 	
+			 	}
+		    	pins[i].sendToBack();
 			}
 		}
 		if(closestPin) //if there is a pin, then this pin is now DRAGGING
 		{
 		 	closestPin.bringToFront();
 		 	
-		 	//show text of this pin
-			closestPin.children['text'].visible = true;
-	    	closestPin.children['rect'].visible = true;
+		 	if(closestPin.children['text'])
+		 	{
+		 		//show text of this pin
+				closestPin.children['text'].visible = true;
+		    	closestPin.children['rect'].visible = true;
+		 	
+		 	}
 		 	
 		 	closestPin = null; // reset closestPin (might be unnecessary)
 		 	sd = 10000; // reset the shortest distance (might be unnecessary)
