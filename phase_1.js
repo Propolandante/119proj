@@ -11,6 +11,7 @@ var pinLayer = new Layer(); // all pins and text labels go in this label
 var typing = false; // true if text box is active (nothing else should happen until this is false again)
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
+var instr;
 var minRequired = 5;
 
 //load initial image in imageLayer
@@ -40,6 +41,8 @@ function objectData(x,y,id)
 /////// HANDLE CLICKS /////////
 
 function onMouseDown(event) {
+	
+	console.log("click!");
 	
 	var inBounds = false;
 	
@@ -238,8 +241,14 @@ function onMouseMove(event) {
 		 	
 		 	}
 		 	
+		 	updateInstructions(closestPin);
+		 	
 		 	closestPin = null; // reset closestPin (might be unnecessary)
 		 	sd = 10000; // reset the shortest distance (might be unnecessary)
+		 }
+		 else
+		 {
+		 	updateInstructions(null);
 		 }
 	}
 }
@@ -269,8 +278,8 @@ function displayText() {
     	justification: 'center'
 	};
 	
-	var instr = new PointText(new Point(450, 670));
-	instr.content = "Click on an object to label it. Click and drag labels to move them around.\nTo delete a label, drag it off of the image. When you're finished, click the Next Image button to proceed.\nLabel at least five objects.";
+	instr = new PointText(new Point(450, 670));
+	instr.content = "Click on an object to label it. Click and drag labels to move them around.\nTo delete a label, drag it off of the image. When you're finished, click the Next Image button to proceed.";
 	
 	instr.style = {
     	fontFamily: 'Helvetica',
@@ -443,7 +452,7 @@ function zxcMakeTextBox(event, group){
 	
 	//set typing to TRUE to prevent user from creating new pins
 	typing = true;
-	
+	updateInstructions(null);
 	var x = event.point.x;
 	var y = event.point.y;
 	
@@ -536,6 +545,7 @@ function zxcMakeTextBox(event, group){
 	  			
 	  			//set typing back to FALSE to allow user to make pins again
 	  			typing = false; 
+				updateInstructions(null);
   			}
   			
   			
@@ -560,6 +570,8 @@ function zxcMakeTextBox(event, group){
 			checkMinimum(); // check to see if button can be enabled
 			imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
 			
+			updateInstructions(group);
+			
   		
   			// console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
@@ -572,13 +584,13 @@ function zxcMakeTextBox(event, group){
   			
   			
   			//set typing back to FALSE to allow user to make pins again
-  			typing = false; 
+  			typing = false;
   		//	imageLayer.activate();
   		}
   		
   			console.log ( "---" + group.children['pin'].position.x + "   " + group.children['pin'].position.y);
   		//	if (objectLabel.children['text'])
-  			
+		//updateInstructions(null);	
   	};
   	
   	
@@ -597,4 +609,17 @@ function checkMinimum() {
 		console.log("num pins: " + pinLayer.children.length + " > " + "minReq: " + minRequired );
 		console.log("button is enabled");
 	}
-}
+};
+
+function updateInstructions(pin){
+
+	if(pin && pin.children['text'])
+	{
+		instr.content = "You labelled this object "+pin.children['text'].content+". Click and drag the label to move it around.\nTo delete this label, drag it off of the image.";
+	}	
+	else if(typing) instr.content = "Enter a name for this object.";
+	else if(draggingPin) instr.content = "Drag this pin to a new location.";
+	else instr.content = "Click on an object to label it. Click and drag labels to move them around.\nTo delete a label, drag it off of the image. When you're finished, click the Next Image button to proceed.";	
+
+};
+
