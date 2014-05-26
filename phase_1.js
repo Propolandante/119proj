@@ -12,13 +12,11 @@ var typing = false; // true if text box is active (nothing else should happen un
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 var minRequired = 5;
-//var objectCount = 0; // how many actual pins on image, since we can't completely remove deleted pins
-
 
 //load initial image in imageLayer
-loadNextImage();
-
 displayText();
+
+loadNextImage();
 
 //switch to pinLayer for pin placement
 pinLayer.activate();
@@ -160,6 +158,7 @@ function onMouseUp(event) {
 		
 		draggingPin = null;
 		checkMinimum(); // check to see if button can be enabled
+		imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
 	}
 	
 };
@@ -207,7 +206,7 @@ function displayText() {
 	};
 	
 	var instr = new PointText(new Point(450, 670));
-	instr.content = "Click on an object to label it. Click and drag labels to move them around.\nTo delete a label, drag it off of the image. When you're finished, click the Next Image button to proceed.";
+	instr.content = "Click on an object to label it. Click and drag labels to move them around.\nTo delete a label, drag it off of the image. When you're finished, click the Next Image button to proceed.\nLabel at least five objects.";
 	
 	instr.style = {
     	fontFamily: 'Helvetica',
@@ -215,6 +214,27 @@ function displayText() {
     	fillColor: 'blue',
     	justification: 'center'
 	};
+	
+	displayObjectCount();
+}
+
+
+function displayObjectCount() {
+	imageLayer.activate();
+	
+	var objectCount = new PointText(new Point(900, 700));
+	objectCount.content = pinLayer.children.length + " / " + minRequired;
+	
+	objectCount.style = {
+    	fontFamily: 'Helvetica',
+    	fontSize: 16,
+    	fillColor: 'red',
+    	justification: 'right'
+	};
+	
+	objectCount.name = "objectCountText";
+	
+	pinLayer.activate();
 }
 
 
@@ -278,6 +298,9 @@ function loadNextImage() {
 	userReport.push(new imageData(img_number));
 	
 	$('#nextImage').attr('disabled', 'disabled');
+	
+	imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
+	
 };
 
 function createPin(event) {
@@ -502,6 +525,8 @@ function zxcMakeTextBox(event, group){
 			group.addChild(rect);
 			
 			checkMinimum(); // check to see if button can be enabled
+			imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
+			
   		
   			// console.log("textGroup id =  " + group.id);
   			//text = zxcTextBox.value;
@@ -530,14 +555,6 @@ function zxcMakeTextBox(event, group){
 };
 
 function checkMinimum() {
-	//var i;
-	// for(i = 0; i < userReport[img_number].objects.length(); i++) {
-		// if ( userReport[img_number].objects[i] != null ) {
-			// objectCount += 1;
-		// }
-	// }
-	
-	//objectCount
 	if(pinLayer.children.length < minRequired) {
 		$('#nextImage').attr('disabled', 'disabled');
 		console.log("num pins: " + pinLayer.children.length + " < " + "minReq: " + minRequired );
