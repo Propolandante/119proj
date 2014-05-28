@@ -384,7 +384,7 @@ function createPin(event) {
 	
 	// set pin colors
 	pin.strokeColor = 'black';
-	pin.fillColor = 'blue';
+	pin.fillColor = getRandomColor(); 
 	pin.name = "pin";
 	pin.dragging = false;
 	
@@ -522,9 +522,19 @@ function zxcMakeTextBox(event, group){
   		{
   			textBoxClosed = true;
   			// console.log("ENTER HAS BEEN PRESSED");
-  			
+  		    	
   			var input = zxcTextBox.value;
-  			
+
+            var pinGroups = pinLayer.children;
+            for(var i=0; i<pinGroups.length; i++) {
+                if(pinGroups[i].id == group.id) {
+                   break;
+                }
+                if (pinGroups[i].children['text'].content == input) {
+                   group.children['pin'].fillColor = pinGroups[i].children['pin'].fillColor;
+                }
+            }
+            console.log(getRandomColor());
   			//if the user pressed ENTER without typing anything
   			if (!input)
   			{
@@ -623,3 +633,11 @@ function updateInstructions(pin){
 
 };
 
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}

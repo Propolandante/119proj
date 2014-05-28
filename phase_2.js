@@ -16,6 +16,8 @@ var vectorStart, vectorPrevious;
 var vectorItem;
 var drawingRelFrom = null;
 var startPt = null;
+var instr;
+var dragging = false;
 
 //load initial image in imageLayer
 loadNextImage();
@@ -100,10 +102,15 @@ function onMouseDown(event) {
 function onMouseDrag(event) {
 	
 	//update vector
+	dragging = true;
+	updateInstructions(null);
 	processVector(event.point, event.modifiers.shift);
 }
 
 function onMouseUp(event) {
+	
+	dragging = false;
+	updateInstructions(null);
 	
 	if (startPt)
 	{
@@ -177,7 +184,7 @@ function displayText() {
     	justification: 'center'
 	};
 	
-	var instr = new PointText(new Point(450, 670));
+	instr = new PointText(new Point(450, 670));
 	instr.content = "Click and drag an arrow from one object to another to label a relationship. This demonstration only has one example image.\nData collected from Phase I will be used as object data in Phase II.";
 	
 	instr.style = {
@@ -451,11 +458,13 @@ function createRelationship(g_from, g_to)
 }
 
 function zxcMakeTextBox(group){
+
 	
 	// console.log ("Text box created at (" + event.point.x + "," + event.point.y + ")");
 	
 	//set typing to TRUE to prevent user from drawing new relationships
 	typing = true;
+	updateInstructions(null);
 	
 	var x = vectorStart.x + (vector.x / 2);
 	var y = vectorStart.y + (vector.y / 2);
@@ -537,7 +546,8 @@ function zxcMakeTextBox(group){
 	  			this.parentElement.removeChild(this);
 	  			
 	  			//set typing back to FALSE to allow user to make pins again
-	  			typing = false; 
+	  			typing = false;
+				updateInstructions(null);				
   			}
   			
   			
@@ -557,7 +567,8 @@ function zxcMakeTextBox(group){
   			
   			
   			//set typing back to FALSE to allow user to make pins again
-  			typing = false; 
+  			typing = false;
+			updateInstructions(null);			
   		//	imageLayer.activate();
   		}
   		
@@ -567,3 +578,10 @@ function zxcMakeTextBox(group){
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
    
 };
+
+function updateInstructions(event){
+	console.log("drawrelfrom "+drawingRelFrom);
+	if(typing) instr.content = "Enter a name for this relationship.";
+	else if(dragging) instr.content = "Drag this object to another object define a relationship.";
+	else instr.content = "Click and drag an arrow from one object to another to label a relationship. This demonstration only has one example image.\nData collected from Phase I will be used as object data in Phase II.";
+}
