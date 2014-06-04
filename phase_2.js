@@ -52,7 +52,11 @@ function relationship(from, to)
 function onMouseDown(event) {
 	
 	//mousedown = true
-	md = true;
+	if(!typing)
+	{
+		md = true;
+	}
+	
 	
 	
 	//check to see if user clicked on a pin
