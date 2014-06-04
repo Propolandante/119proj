@@ -384,9 +384,13 @@ function createPin(event) {
 	
 	// set pin colors
 	pin.strokeColor = 'black';
-	pin.fillColor = getRandomColor(); 
+	pin.color = getRandomColor(); 
 	pin.name = "pin";
 	pin.dragging = false;
+	pin.strokeWidth = 1.5;
+	
+	// Set the dashed stroke to [ xxpt dash, xpt gap]:
+	pin.dashArray = [5, 1];
 	
 	//console.log("pin is drawn");
 	
@@ -422,7 +426,6 @@ function makeTags(x, y, tagText){
 
 	var text = new PointText(x, y + 25);
 	text.content = tagText;
-	text.data.home = tagText;
 	
 
 	if (sources.indexOf(tagText) == -1 && userDefine.indexOf(tagText) == -1)
@@ -506,7 +509,7 @@ function zxcMakeTextBox(event, group){
   	
   	zxcTextBox.style.position ='absolute';
   	zxcTextBox.style.left     = event.point.x+'px';
-  	zxcTextBox.style.top      = event.point.y+'px';
+  	zxcTextBox.style.top      = event.point.y+18+'px';
   	//zxcTextBox.style.fontSize = (12)+'px';      
   	
   	// ******
@@ -524,7 +527,9 @@ function zxcMakeTextBox(event, group){
   			// console.log("ENTER HAS BEEN PRESSED");
   		    	
   			var input = zxcTextBox.value;
-
+            group.children['pin'].fillColor = group.children['pin'].color;
+            group.children['pin'].strokeWidth = 1;
+            group.children['pin'].dashArray = [0,0];
             var pinGroups = pinLayer.children;
             for(var i=0; i<pinGroups.length; i++) {
                 if(pinGroups[i].id == group.id) {
@@ -547,8 +552,7 @@ function zxcMakeTextBox(event, group){
   				//as well as the pin and objectLabel group!
   				group.remove();
   				// console.log("objectLabel group and children (hopefully) removed.");
-  				
-  				
+  			
   				$('#tags').autocomplete("close");
   			
 	  			this.parentElement.removeChild(this);
@@ -558,24 +562,27 @@ function zxcMakeTextBox(event, group){
 				updateInstructions(null);
   			}
   			
-  			
+  			//group.children['pin'].fillColor = getRandomColor();
   			userReport[img_number].objects.slice(-1)[0].name = zxcTextBox.value;
   			console.log("Object number " + userReport[img_number].objects.slice(-1)[0].objectId + " is named " + userReport[img_number].objects.slice(-1)[0].name);
   			
   			group.addChild(makeTags(x, y, zxcTextBox.value));
   			
+  			// ** The following code is for the backdrop
+  			// making a new rectangle that its position is based on the pin's position
   			
-		  	var from = new Point(group.children['pin'].position.x-group.children['text'].data.home.length*8, 
+		  	var from = new Point(group.children['pin'].position.x-group.children['text'].content.length*8, 
 		  	                     group.children['pin'].position.y+8);
-			var to   = new Point(group.children['pin'].position.x+group.children['text'].data.home.length*8, 
+			var to   = new Point(group.children['pin'].position.x+group.children['text'].content.length*8, 
 			                   group.children['pin'].position.y+30);
 			var rect = new Path.Rectangle(from, to);
-		//	var path = new Path.Rectangle(rect);
+
 			rect.fillColor = 'red';
 			rect.blendMode = 'luminosity';
 			rect.name = 'rect';
 			
 			group.addChild(rect);
+			// ** end of backdrop code
 			
 			checkMinimum(); // check to see if button can be enabled
 			imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
