@@ -14,12 +14,12 @@ var userReport = [null,null,null,null,null]; // holds all of the user's imgData.
 var userDefine = [];
 var vector; // this is the vector the user draws with
 var vectorStart, vectorPrevious;
-var vectorItem;
-var drawingRelFrom = null;
-var startPt = null;
-var instr;
-var md;
-var dragging = false;
+var vectorItem; // dynamically drawn vector
+var drawingRelFrom = null; // pin we're currently drawing a reltionship FROM'
+var startPin = null;
+var instr; // user instructions
+var md; // mousedown
+var dragging = false; 
 
 //load initial image in imageLayer
 loadNextImage();
@@ -75,20 +75,25 @@ function onMouseDown(event) {
 					
 					sd = event.point.getDistance(pins[i].children['pin'].position);
 					closestPin = pins[i];
-					startPt = pins[i].children['pin'] ;
-					startPt.strokeColor = 'yellow';
-					startPt.strokeWidth = 3;
+					
 					
 				}
 			}
 		}
 		 if(closestPin) //if there is a pin, then we are now drawing a relationship from it
 		 {
+		 	// startPin = closestPin.children['pin'] ;
+			// startPin.strokeColor = 'yellow';
+			// startPin.strokeWidth = 3;
+		 	
 		 	drawingRelFrom = closestPin;
+		 	
+		 	drawingRelFrom.children['pin'].strokeColor = 'yellow';
+		 	drawingRelFrom.children['pin'].strokeWidth = 3;
 		 	
 		 	//start drawing new vector
 			vectorStart = drawingRelFrom.children['pin'].position;
-			processVector(event.point, true);
+			processVector(event.point);
 		 	
 		 	
 		 	closestPin = null; // reset closestPin (might be unnecessary)
@@ -96,21 +101,24 @@ function onMouseDown(event) {
 		 }
 		 else
 		 {
-		 	startPt.strokeColor = 'yellow';
-			startPt.strokeWidth = 3;
-		 	console.log (" there is no pin under mouse's position ");
+		 	
+		 	if(drawingRelFrom)
+		 	{
+		 		drawingRelFrom.children['pin'].strokeColor = 'black';
+			 	drawingRelFrom.children['pin'].strokeWidth = 1;
+			 	drawingRelFrom = null;
+			}
+		 	
+		 	
+		 	vectorStart = null;
+		 	
+		 	// startPin.strokeColor = 'yellow';
+			// startPin.strokeWidth = 3;
+		 	// console.log (" there is no pin under mouse's position ");
 		 }
 	}
 	
 }
-
-// function onMouseDrag(event) {
-// 	
-	// //update vector
-	// dragging = true;
-	// updateInstructions(null);
-	// processVector(event.point, event.modifiers.shift);
-// }
 
 function onMouseUp(event) {
 	
@@ -122,12 +130,12 @@ function onMouseUp(event) {
 	
 	updateInstructions(null);
 	
-	if (startPt)
-	{
-		startPt.strokeColor = 'black';
-		startPt.strokeWidth = 1;
-		//startPt = null;
-	}
+	// if (startPin)
+	// {
+		// startPin.strokeColor = 'black';
+		// startPin.strokeWidth = 1;
+		// //startPin = null;
+	// }
 	
 	//check to see if user dragged to ANOTHER pin
 	
@@ -152,19 +160,31 @@ function onMouseUp(event) {
 	 {
 	 		 	
 	 	//draw the vector TO this pin's position
-	 	processVector(closestPin.children['pin'].position, false);
+	 	processVector(closestPin.children['pin'].position);
 		vectorPrevious = vector;
 		
 		createRelationship(drawingRelFrom, closestPin);
 	 	
 	 	closestPin = null; // reset closestPin (might be unnecessary)
 	 	sd = 10000; // reset the shortest distance (might be unnecessary)
+	 	
+	 	drawingRelFrom.children['pin'].strokeColor = 'black';
+	 	drawingRelFrom.children['pin'].strokeWidth = 1;
+	 	drawingRelFrom = null;
+	 	
 	 }
 	 else
 	 {
 	 	if(vectorItem)
 	 	{
 	 		vectorItem.remove();
+	 	}
+	 	
+	 	if(drawingRelFrom)
+	 	{
+	 		drawingRelFrom.children['pin'].strokeColor = 'black';
+		 	drawingRelFrom.children['pin'].strokeWidth = 1;
+		 	drawingRelFrom = null;
 	 	}
 	 }
 	
@@ -179,6 +199,16 @@ function onMouseMove(event){
 	
 {
 	
+	// if(drawingRelFrom)
+	// {
+		// console.log("yes");
+	// }
+	// else
+	// {
+		// console.log("no");
+	// }
+	
+	
 	if(md)
 	{
 		dragging = true;
@@ -187,7 +217,11 @@ function onMouseMove(event){
 	if(dragging)
 	{
 		updateInstructions(null);
-		processVector(event.point, event.modifiers.shift);
+		if(vectorStart)
+		{
+			processVector(event.point);
+		}
+		
 	}
 			
 	//check to see if we are hovering over an existing pin
@@ -201,6 +235,13 @@ function onMouseMove(event){
 	for(i = 0; i < pins.length; i++)
 	{
 		pins[i].children['text'].visible = false;
+		
+		if(pins[i] != drawingRelFrom)
+		{
+			pins[i].children['pin'].strokeColor = 'black';
+			pins[i].children['pin'].strokeWidth = 1;
+		}
+		
 	}
 	
 	
@@ -212,10 +253,6 @@ function onMouseMove(event){
 		
 	}
 		
-		
-		
-		
-		
 		for(i = 0; i < pins.length; i++)
 		{
 			//if we are hovering over this pin
@@ -224,17 +261,6 @@ function onMouseMove(event){
 				// check to see if it is the closest pin (we don't want to highlight two pins at once)
 				if (event.point.getDistance(pins[i].children['pin'].position) < sd)
 				{
-					// if we are overwriting a pin that used to be the closest one
-					// if(lastIndex)
-					// {
-						// if(pins[lastIndex].children['text'])
-						// {
-					 		// //hide text of this pin
-							// pins[lastIndex].children['text'].visible = false;
-					    	// //pins[lastIndex].children['rect'].visible = false;
-// 					 	
-					 	// }
-					// }
 					
 					// mark the current pin to be the closest one
 					sd = event.point.getDistance(pins[i].children['pin'].position);
@@ -246,14 +272,7 @@ function onMouseMove(event){
 			//if we are NOT hovering over this pin
 			else
 			{
-				// if(pins[i].children['text'])
-			 	// {
-			 		// //hide text of this pin
-					// pins[i].children['text'].visible = false;
-			    	// //pins[i].children['rect'].visible = false;
-// 			    	
-// 			 	
-			 	// }
+				
 		    	pins[i].sendToBack();
 			}
 		}
@@ -267,14 +286,28 @@ function onMouseMove(event){
 				closestPin.children['text'].visible = true;
 		    	//closestPin.children['rect'].visible = true;
 		    	
+		    	
+		    	if(drawingRelFrom)
+		    	{
+		    		closestPin.children['pin'].strokeColor = 'yellow';
+		    		closestPin.children['pin'].strokeWidth = 3;
+		    	}
+		    	
+		    	
 		    	//display any relationships coming from the pin's object
 				for(i=0;i<relationshipLayer.children.length;i++)
 				{
 					var fromId = relationshipLayer.children[i].from.objectId;
 					
+					
+					//if there's a match and we're not currently creating a relationship
 					if(fromId == closestPin.objectId)
 					{
 						relationshipLayer.children[i].visible = true;
+						
+						//also show the text of the object that the relationship is TO
+						
+						relationshipLayer.children[i].to.children['text'].visible = true;
 					}
 				}
 		 	
@@ -410,50 +443,6 @@ function loadPins() {
 		// console.log("Creating pinText for " + imageObjectData.objects[i].name);
 		objectLabel.addChild(makeObjectTags(imageObjectData.objects[i].x, imageObjectData.objects[i].y, imageObjectData.objects[i].name));
 		
-		// //define pin behavior on mouseOver
-		// pin.onMouseEnter = function(event) 
-		// {
-			// //bring pin to front in case of overlap
-			// this.parent.bringToFront();
-// 			
-			// //grow pin to emphasize which one is selected and hint that it can be dragged
-			// // this.scale(1.6);
-			// //console.log("hover");
-// 			
-			// //display text
-			// if(this.parent.children['text'])
-			// {
-				// this.parent.children['text'].visible = true;
-			// }
-// 			
-			// //display any relationships coming from the pin's object
-			// for(i=0;i<relationshipLayer.children.length;i++)
-			// {
-				// var fromId = relationshipLayer.children[i].from.objectId;
-// 				
-				// if(fromId == this.parent.objectId)
-				// {
-					// relationshipLayer.children[i].visible = true;
-				// }
-			// }
-// 			
-		// };
-		// pin.onMouseLeave = function(event) 
-		// {
-			// // this.scale(0.625);
-			// //console.log("unhover");
-// 			
-			// if(this.parent.children['text'])
-			// {
-				// this.parent.children['text'].visible = false;
-			// }
-// 			
-			// for(i=0;i<relationshipLayer.children.length;i++)
-			// {
-				// relationshipLayer.children[i].visible = false;
-			// }
-		// };
-		
 		pin.selected = false;
 		
 		// console.log("pins in layer = " + pinLayer.children.length);
@@ -518,12 +507,12 @@ function makeRelTags(x, y, tagText){
 	return text;
 };
 
-function processVector(point, drag) {
+function processVector(point) {
 	vector = point - vectorStart;
-	drawVector(drag);
+	drawVector();
 }
 
-function drawVector(drag) {
+function drawVector() {
 	
 	tempArrowLayer.activate();
 	
