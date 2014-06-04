@@ -8,6 +8,7 @@ var raster; // image to be displayed
 var imageLayer = project.activeLayer; // this layer holds the raster
 var pinLayer = new Layer(); // all pins and text labels go in this label
 var relationshipLayer = new Layer();
+var tempArrowLayer = new Layer();
 var typing = false; // true if text box is active (nothing else should happen until this is false again)
 var userReport = [null,null,null,null,null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
@@ -17,6 +18,7 @@ var vectorItem;
 var drawingRelFrom = null;
 var startPt = null;
 var instr;
+var md;
 var dragging = false;
 
 //load initial image in imageLayer
@@ -36,7 +38,7 @@ function imageRelationshipData(id)
 }
 
 function relationship(from, to)
-{
+{
 	this.from_id = from.objectId;
 	this.from_name = from.children['text'].content;
 	this.to_id = to.objectId;
@@ -48,6 +50,9 @@ function relationship(from, to)
 /////// HANDLE CLICKS /////////
 
 function onMouseDown(event) {
+	
+	//mousedown = true
+	md = true;
 	
 	
 	//check to see if user clicked on a pin
@@ -99,17 +104,22 @@ function onMouseDown(event) {
 	
 }
 
-function onMouseDrag(event) {
-	
-	//update vector
-	dragging = true;
-	updateInstructions(null);
-	processVector(event.point, event.modifiers.shift);
-}
+// function onMouseDrag(event) {
+// 	
+	// //update vector
+	// dragging = true;
+	// updateInstructions(null);
+	// processVector(event.point, event.modifiers.shift);
+// }
 
 function onMouseUp(event) {
 	
+	
+	//mousedown = false
+	md = false;
 	dragging = false;
+	
+	
 	updateInstructions(null);
 	
 	if (startPt)
@@ -162,6 +172,124 @@ function onMouseUp(event) {
 	
 	
 	
+	
+}
+
+function onMouseMove(event){
+	
+{
+	
+	if(md)
+	{
+		dragging = true;
+	}
+	
+	if(dragging)
+	{
+		updateInstructions(null);
+		processVector(event.point, event.modifiers.shift);
+	}
+			
+	//check to see if we are hovering over an existing pin
+	var pins = pinLayer.children;
+	var sd = 10000;
+	var lastIndex = null;
+	var closestPin = null;
+	
+	
+	//initialize all pins to NOT showing
+	for(i = 0; i < pins.length; i++)
+	{
+		pins[i].children['text'].visible = false;
+	}
+	
+	
+	//initialize all relationship lines to NOT showing
+	for(i=0;i<relationshipLayer.children.length;i++)
+	{
+		
+		relationshipLayer.children[i].visible = false;
+		
+	}
+		
+		
+		
+		
+		
+		for(i = 0; i < pins.length; i++)
+		{
+			//if we are hovering over this pin
+			if (pins[i].children['pin'].contains(event.point))
+			{
+				// check to see if it is the closest pin (we don't want to highlight two pins at once)
+				if (event.point.getDistance(pins[i].children['pin'].position) < sd)
+				{
+					// if we are overwriting a pin that used to be the closest one
+					// if(lastIndex)
+					// {
+						// if(pins[lastIndex].children['text'])
+						// {
+					 		// //hide text of this pin
+							// pins[lastIndex].children['text'].visible = false;
+					    	// //pins[lastIndex].children['rect'].visible = false;
+// 					 	
+					 	// }
+					// }
+					
+					// mark the current pin to be the closest one
+					sd = event.point.getDistance(pins[i].children['pin'].position);
+					closestPin = pins[i];
+					//remember what index this is at, in case we need to hide the text later
+					lastIndex = i;
+				}
+			}
+			//if we are NOT hovering over this pin
+			else
+			{
+				// if(pins[i].children['text'])
+			 	// {
+			 		// //hide text of this pin
+					// pins[i].children['text'].visible = false;
+			    	// //pins[i].children['rect'].visible = false;
+// 			    	
+// 			 	
+			 	// }
+		    	pins[i].sendToBack();
+			}
+		}
+		if(closestPin) //if there is a pin, then this pin is now DRAGGING
+		{
+		 	closestPin.bringToFront();
+		 	
+		 	if(closestPin.children['text'])
+		 	{
+		 		//show text of this pin
+				closestPin.children['text'].visible = true;
+		    	//closestPin.children['rect'].visible = true;
+		    	
+		    	//display any relationships coming from the pin's object
+				for(i=0;i<relationshipLayer.children.length;i++)
+				{
+					var fromId = relationshipLayer.children[i].from.objectId;
+					
+					if(fromId == closestPin.objectId)
+					{
+						relationshipLayer.children[i].visible = true;
+					}
+				}
+		 	
+		 	}
+		 	
+		 	updateInstructions(closestPin);
+		 	
+		 	closestPin = null; // reset closestPin (might be unnecessary)
+		 	sd = 10000; // reset the shortest distance (might be unnecessary)
+		 }
+		 else
+		 {
+		 	updateInstructions(null);
+		 }
+	}
 	
 }
 
@@ -282,49 +410,49 @@ function loadPins() {
 		// console.log("Creating pinText for " + imageObjectData.objects[i].name);
 		objectLabel.addChild(makeObjectTags(imageObjectData.objects[i].x, imageObjectData.objects[i].y, imageObjectData.objects[i].name));
 		
-		//define pin behavior on mouseOver
-		pin.onMouseEnter = function(event) 
-		{
-			//bring pin to front in case of overlap
-			this.parent.bringToFront();
-			
-			//grow pin to emphasize which one is selected and hint that it can be dragged
-			// this.scale(1.6);
-			//console.log("hover");
-			
-			//display text
-			if(this.parent.children['text'])
-			{
-				this.parent.children['text'].visible = true;
-			}
-			
-			//display any relationships coming from the pin's object
-			for(i=0;i<relationshipLayer.children.length;i++)
-			{
-				var fromId = relationshipLayer.children[i].from.objectId;
-				
-				if(fromId == this.parent.objectId)
-				{
-					relationshipLayer.children[i].visible = true;
-				}
-			}
-			
-		};
-		pin.onMouseLeave = function(event) 
-		{
-			// this.scale(0.625);
-			//console.log("unhover");
-			
-			if(this.parent.children['text'])
-			{
-				this.parent.children['text'].visible = false;
-			}
-			
-			for(i=0;i<relationshipLayer.children.length;i++)
-			{
-				relationshipLayer.children[i].visible = false;
-			}
-		};
+		// //define pin behavior on mouseOver
+		// pin.onMouseEnter = function(event) 
+		// {
+			// //bring pin to front in case of overlap
+			// this.parent.bringToFront();
+// 			
+			// //grow pin to emphasize which one is selected and hint that it can be dragged
+			// // this.scale(1.6);
+			// //console.log("hover");
+// 			
+			// //display text
+			// if(this.parent.children['text'])
+			// {
+				// this.parent.children['text'].visible = true;
+			// }
+// 			
+			// //display any relationships coming from the pin's object
+			// for(i=0;i<relationshipLayer.children.length;i++)
+			// {
+				// var fromId = relationshipLayer.children[i].from.objectId;
+// 				
+				// if(fromId == this.parent.objectId)
+				// {
+					// relationshipLayer.children[i].visible = true;
+				// }
+			// }
+// 			
+		// };
+		// pin.onMouseLeave = function(event) 
+		// {
+			// // this.scale(0.625);
+			// //console.log("unhover");
+// 			
+			// if(this.parent.children['text'])
+			// {
+				// this.parent.children['text'].visible = false;
+			// }
+// 			
+			// for(i=0;i<relationshipLayer.children.length;i++)
+			// {
+				// relationshipLayer.children[i].visible = false;
+			// }
+		// };
 		
 		pin.selected = false;
 		
@@ -396,6 +524,9 @@ function processVector(point, drag) {
 }
 
 function drawVector(drag) {
+	
+	tempArrowLayer.activate();
+	
 	//clear previous vector items
 	
 	if (vectorItem)
@@ -413,6 +544,8 @@ function drawVector(drag) {
 	]);
 	vectorItem.strokeWidth = 5;
 	vectorItem.strokeColor = '#e4141b';
+	
+	relationshipLayer.activate();
 	
 }
 
@@ -580,7 +713,7 @@ function zxcMakeTextBox(group){
 };
 
 function updateInstructions(event){
-	console.log("drawrelfrom "+drawingRelFrom);
+	//console.log("drawrelfrom "+drawingRelFrom);
 	if(typing) instr.content = "Enter a name for this relationship.";
 	else if(dragging) instr.content = "Drag this object to another object define a relationship.";
 	else instr.content = "Click and drag an arrow from one object to another to label a relationship. This demonstration only has one example image.\nData collected from Phase I will be used as object data in Phase II.";
