@@ -672,3 +672,9 @@ function getRandomColor() {
     }
     return color;
 }
+
+// random jquery stuff for the tutorial
+$('.expand-one').click(function(){
+    $('.content-one').slideToggle('slow');
+});
+
