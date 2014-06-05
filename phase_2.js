@@ -710,3 +710,8 @@ function updateInstructions(event){
 	else if(dragging) instr.content = "Drag this object to another object define a relationship.";
 	else instr.content = "Click and drag an arrow from one object to another to label a relationship. This demonstration only has one example image.\nData collected from Phase I will be used as object data in Phase II.";
 }
+
+// random jquery stuff for the tutorial
+$('.expand-one').click(function(){
+    $('.content-one').slideToggle('slow');
+});
