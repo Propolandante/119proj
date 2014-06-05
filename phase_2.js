@@ -13,13 +13,14 @@ var typing = false; // true if text box is active (nothing else should happen un
 var userReport = [null,null,null,null,null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 var vector; // this is the vector the user draws with
-var vectorStart, vectorPrevious;
+var vectorStart;
 var vectorItem; // dynamically drawn vector
 var drawingRelFrom = null; // pin we're currently drawing a reltionship FROM'
 var startPin = null;
 var instr; // user instructions
 var md; // mousedown
-var dragging = false; 
+var dragging = false;
+var permVec; // don't hide this vector until user is done labelling relationship 
 
 //load initial image in imageLayer
 loadNextImage();
@@ -134,13 +135,6 @@ function onMouseUp(event) {
 	
 	updateInstructions(null);
 	
-	// if (startPin)
-	// {
-		// startPin.strokeColor = 'black';
-		// startPin.strokeWidth = 1;
-		// //startPin = null;
-	// }
-	
 	//check to see if user dragged to ANOTHER pin
 	
 	var pins = pinLayer.children;
@@ -165,7 +159,6 @@ function onMouseUp(event) {
 	 		 	
 	 	//draw the vector TO this pin's position
 	 	processVector(closestPin.children['pin'].position);
-		vectorPrevious = vector;
 		
 		createRelationship(drawingRelFrom, closestPin);
 	 	
@@ -203,16 +196,6 @@ function onMouseMove(event){
 	
 {
 	
-	// if(drawingRelFrom)
-	// {
-		// console.log("yes");
-	// }
-	// else
-	// {
-		// console.log("no");
-	// }
-	
-	
 	if(md)
 	{
 		dragging = true;
@@ -249,11 +232,15 @@ function onMouseMove(event){
 	}
 	
 	
-	//initialize all relationship lines to NOT showing
+	//initialize all relationship lines to transparent
 	for(i=0;i<relationshipLayer.children.length;i++)
 	{
+		if(relationshipLayer.children[i] != permVec)
+		{
+			relationshipLayer.children[i].children['vec'].opacity = 0.45;
+			relationshipLayer.children[i].children['text'].visible = false;
+		}
 		
-		relationshipLayer.children[i].visible = false;
 		
 	}
 		
@@ -307,7 +294,10 @@ function onMouseMove(event){
 					//if there's a match and we're not currently creating a relationship
 					if(fromId == closestPin.objectId)
 					{
-						relationshipLayer.children[i].visible = true;
+						
+						//increase opacity of highlighted vectors
+						relationshipLayer.children[i].children['vec'].opacity = 1.0;
+						relationshipLayer.children[i].children['text'].visible = true;
 						
 						//also show the text of the object that the relationship is TO
 						
@@ -556,7 +546,7 @@ function createRelationship(g_from, g_to)
 	relLabel = new Group();
 	
 	//create subgroup to hold arrow path objects
-	var arrowVector = vector.normalize(10);
+	var arrowVector = vector.normalize(15);
 	var end = vectorStart + vector;
 	relArrow = new Group([
 		new Path([vectorStart, end]),
@@ -567,17 +557,21 @@ function createRelationship(g_from, g_to)
 		])
 	]);
 	
+	
+	relArrow.name = 'vec';
 	relArrow.strokeWidth = 2;
 	relArrow.strokeColor = '#ffff00';
 	relArrow.visible = true;
+	relArrow.opacity = .45;
 	
 	
 	//add new subgroup to main group	
 	relLabel.addChild(relArrow);
 	relLabel.from = g_from;
 	relLabel.to = g_to;
-	relLabel.visible = false;
+	//relLabel.visible = false;
 	
+	permVec = relLabel;
 	
 	zxcMakeTextBox(relLabel);
 	
@@ -684,6 +678,11 @@ function zxcMakeTextBox(group){
   			
   			group.addChild(makeRelTags(x, y, zxcTextBox.value));
   			
+  			if(permVec)
+  			{
+  				permVec.children['vec'].opacity = 1.0;
+  				permVec = null;
+  			}
   			
   			console.log("Relationships: " + relationshipLayer.children.length);
   			
