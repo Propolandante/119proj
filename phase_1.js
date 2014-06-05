@@ -3,7 +3,7 @@
 // global variables
 var img_number = 0; //there is no "image 0", this is incremented before loading each image
 var img_count = 10; // total number of images in directory
-var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/images/";
+var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/1_images/";
 var draggingPin = null; // pin being dragged
 var raster; // image to be displayed
 var imageLayer = project.activeLayer; // this layer holds the raster
