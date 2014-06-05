@@ -386,7 +386,7 @@ function loadNextImage() {
 	
 	$('#nextImage').attr('disabled', 'disabled');
 	
-	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of five objecets\n" );
+	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of "+ minRequired + " objecets\n" );
 	//mar imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
 	
 };
@@ -637,7 +637,7 @@ function checkMinimum() {
 	if(pinLayer.children.length < minRequired) {
 		$('#nextImage').attr('disabled', 'disabled');
 		//$('#nextImage').attr('value', "you must label a minimum of five objecets\n" + pinLayer.children.length  +"/ " + minRequired);
-		$('#nextImage').attr('value',  pinLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of five objecets\n" );
+		$('#nextImage').attr('value',  pinLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of " + minRequired +" objecets\n" );
 		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
 		console.log("num pins: " + pinLayer.children.length + " < " + "minReq: " + minRequired );
 		console.log("button is disabled");

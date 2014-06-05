@@ -22,6 +22,12 @@ var md; // mousedown
 var dragging = false;
 var permVec; // don't hide this vector until user is done labelling relationship 
 
+var totalCounter = 0;
+var helperCounter = 0;
+
+var minRequired = 3;
+
+
 //load initial image in imageLayer
 loadNextImage();
 
@@ -402,6 +408,14 @@ function loadNextImage() {
 	
 	//start new imageData Object in userReport array
 	userReport.push(new imageRelationshipData(img_number));
+	
+	totalCounter = totalCounter + helperCounter ;
+	
+	
+	$('#nextImage').attr('disabled', 'disabled');
+	
+	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of "+ minRequired +" relationships\n" );
+	
 };
 
 function loadPins() {
@@ -684,6 +698,11 @@ function zxcMakeTextBox(group){
   				permVec = null;
   			}
   			
+  			if (relationshipLayer.children.length)
+				helperCounter = relationshipLayer.children.length;
+			
+			checkMinimum();
+  			
   			console.log("Relationships: " + relationshipLayer.children.length);
   			
   			$('#tags').autocomplete("close");
@@ -702,6 +721,29 @@ function zxcMakeTextBox(group){
    //onblur --- mouse click to somewhere else that does not foucs on create obj (textbox)
    //zxcTextBox.onblur = function(){ this.style.visibility='hidden'; }
    
+};
+
+
+function checkMinimum() {
+	
+	var temp = helperCounter + totalCounter;
+
+	if(relationshipLayer.children.length < minRequired) {
+		$('#nextImage').attr('disabled', 'disabled');
+		//$('#nextImage').attr('value', "you must label a minimum of five objecets\n" + pinLayer.children.length  +"/ " + minRequired);
+		$('#nextImage').attr('value',  relationshipLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of "+minRequired +" objecets\n" );
+		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
+		console.log("num pins: " + relationshipLayer.children.length + " < " + "minReq: " + minRequired );
+		console.log("button is disabled");
+	} else {
+		$('#nextImage').removeAttr('disabled');
+		$('#nextImage').attr('value', 'Continue/Next');
+		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
+		//$('#nextImage').value ( "YES I DO!");
+		
+		console.log("num pins: " + relationshipLayer.children.length + " > " + "minReq: " + minRequired );
+		console.log("button is enabled");
+	}
 };
 
 function updateInstructions(event){
