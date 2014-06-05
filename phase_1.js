@@ -386,7 +386,7 @@ function loadNextImage() {
 	
 	$('#nextImage').attr('disabled', 'disabled');
 	
-	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of "+ minRequired + " objecets\n" );
+	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of "+ minRequired + " objects\n" );
 	//mar imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
 	
 };
