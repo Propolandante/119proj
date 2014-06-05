@@ -539,8 +539,9 @@ function zxcMakeTextBox(event, group){
   		{
   			textBoxClosed = true;
   			// console.log("ENTER HAS BEEN PRESSED");
-  		    	
+  		    	if(event.keyCode == '13') {
   			var input = zxcTextBox.value;
+  		    	}
             group.children['pin'].fillColor = group.children['pin'].color;
             group.children['pin'].strokeWidth = 1;
             group.children['pin'].dashArray = [0,0];
