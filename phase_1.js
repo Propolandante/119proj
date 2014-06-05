@@ -12,7 +12,9 @@ var typing = false; // true if text box is active (nothing else should happen un
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 var instr;
-var minRequired = 1;
+var minRequired = 3;
+var totalCounter = 0;
+var helperCounter = 0;
 
 //load initial image in imageLayer
 displayText();
@@ -160,8 +162,11 @@ function onMouseUp(event) {
 		draggingPin.remove();
 		
 		draggingPin = null;
+		
+		if ( helperCounter != 0)
+			helperCounter--;
 		checkMinimum(); // check to see if button can be enabled
-		imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
+		//imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
 	}
 	
 };
@@ -288,15 +293,21 @@ function displayText() {
     	justification: 'center'
 	};
 	
-	displayObjectCount();
+	//displayObjectCount();
+//	document.getElementById("nextImage").style.background = '#A52A2A';
+	//document.getElementById("nextImage").style.fontSize= 16 +  'px';
+//	document.getElementById("nextImage").style.strokeColor= 'blakc';
+	//$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of five objecets\n" );
 }
 
 
 function displayObjectCount() {
 	imageLayer.activate();
 	
-	var objectCount = new PointText(new Point(900, 700));
-	objectCount.content = pinLayer.children.length + " / " + minRequired;
+	var objectCount = new PointText(new Point(1000, 700));
+	//objectCount.content = pinLayer.children.length + " / " + minRequired;
+	
+	//mark objectCount.content = "You have " + minRequired - pinLayer.children.length + " objects(s) left.";
 	
 	objectCount.style = {
     	fontFamily: 'Helvetica',
@@ -370,9 +381,13 @@ function loadNextImage() {
 	//start new imageData Object in userReport array
 	userReport.push(new imageData(img_number));
 	
+	totalCounter = totalCounter + helperCounter ;
+	
+	
 	$('#nextImage').attr('disabled', 'disabled');
 	
-	imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
+	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of five objecets\n" );
+	//mar imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
 	
 };
 
@@ -510,7 +525,6 @@ function zxcMakeTextBox(event, group){
   	zxcTextBox.style.position ='absolute';
   	zxcTextBox.style.left     = event.point.x+'px';
   	zxcTextBox.style.top      = event.point.y+18+'px';
-  	//zxcTextBox.style.fontSize = (12)+'px';      
   	
   	// ******
   	
@@ -521,7 +535,7 @@ function zxcMakeTextBox(event, group){
     // press enter to finish typing
   	zxcTextBox.onkeydown = function(event){ 
   		//console.log ("before enter " + zxcTextBox.value);  		
-  		if (event.keyCode == '13')
+  		if (event.keyCode == '13' || event.keyCode == '27')
   		{
   			textBoxClosed = true;
   			// console.log("ENTER HAS BEEN PRESSED");
@@ -583,22 +597,19 @@ function zxcMakeTextBox(event, group){
 			
 			group.addChild(rect);
 			// ** end of backdrop code
+		
+			if (pinLayer.children.length)
+				helperCounter = pinLayer.children.length;
 			
 			checkMinimum(); // check to see if button can be enabled
-			imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
+			//imageLayer.children['objectCountText'].content = pinLayer.children.length + " / " + minRequired;
+			
 			
 			updateInstructions(group);
 			
-  		
-  			// console.log("textGroup id =  " + group.id);
-  			//text = zxcTextBox.value;
-  			//console.log("text: " + text);
-  			//this.style.visibility='hidden';
-  			
   			$('#tags').autocomplete("close");
   			
   			this.parentElement.removeChild(this);
-  			
   			
   			//set typing back to FALSE to allow user to make pins again
   			typing = false;
@@ -608,6 +619,7 @@ function zxcMakeTextBox(event, group){
   			console.log ( "---" + group.children['pin'].position.x + "   " + group.children['pin'].position.y);
   		//	if (objectLabel.children['text'])
 		//updateInstructions(null);	
+		
   	};
   	
   	
@@ -617,12 +629,24 @@ function zxcMakeTextBox(event, group){
 };
 
 function checkMinimum() {
+	
+	
+	var temp = helperCounter + totalCounter;
+
+
 	if(pinLayer.children.length < minRequired) {
 		$('#nextImage').attr('disabled', 'disabled');
+		//$('#nextImage').attr('value', "you must label a minimum of five objecets\n" + pinLayer.children.length  +"/ " + minRequired);
+		$('#nextImage').attr('value',  pinLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of five objecets\n" );
+		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
 		console.log("num pins: " + pinLayer.children.length + " < " + "minReq: " + minRequired );
 		console.log("button is disabled");
 	} else {
 		$('#nextImage').removeAttr('disabled');
+		$('#nextImage').attr('value', 'Continue/Next');
+		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
+		//$('#nextImage').value ( "YES I DO!");
+		
 		console.log("num pins: " + pinLayer.children.length + " > " + "minReq: " + minRequired );
 		console.log("button is enabled");
 	}
@@ -648,8 +672,3 @@ function getRandomColor() {
     }
     return color;
 }
-
-// random jquery stuff for the tutorial
-$('.expand-one').click(function(){
-    $('.content-one').slideToggle('slow');
-});
