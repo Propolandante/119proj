@@ -12,7 +12,7 @@ var typing = false; // true if text box is active (nothing else should happen un
 var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 var instr;
-var minRequired = 5;
+var minRequired = 1;
 
 //load initial image in imageLayer
 displayText();
@@ -648,3 +648,8 @@ function getRandomColor() {
     }
     return color;
 }
+
+// random jquery stuff for the tutorial
+$('.expand-one').click(function(){
+    $('.content-one').slideToggle('slow');
+});
