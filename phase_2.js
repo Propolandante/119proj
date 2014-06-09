@@ -45,7 +45,8 @@ function imageRelationshipData(id)
 }
 
 function relationship(from, to)
-{
+{
+
 	this.from_id = from.objectId;
 	this.from_name = from.children['text'].content;
 	this.to_id = to.objectId;
@@ -655,13 +656,13 @@ function zxcMakeTextBox(group){
     // press enter to finish typing
   	zxcTextBox.onkeydown = function(event){ 
   		//console.log ("before enter " + zxcTextBox.value);  		
-  		if (event.keyCode == '13')
+  		if (event.keyCode == '13' || event.keyCode == '27')
   		{
   			textBoxClosed = true;
   			// console.log("ENTER HAS BEEN PRESSED");
-  			
+  			if (event.keyCode == '13') {
   			var input = zxcTextBox.value;
-  			
+  			}
   			//if the user pressed ENTER without typing anything
   			if (!input)
   			{
