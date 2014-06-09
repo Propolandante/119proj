@@ -731,14 +731,14 @@ function checkMinimum() {
 	if(relationshipLayer.children.length < minRequired) {
 		$('#nextImage').attr('disabled', 'disabled');
 		//$('#nextImage').attr('value', "you must label a minimum of five objecets\n" + pinLayer.children.length  +"/ " + minRequired);
-		$('#nextImage').attr('value',  relationshipLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of "+minRequired +" objecets\n" );
-		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
+		$('#nextImage').attr('value',  relationshipLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of "+minRequired +" relationships\n" );
+		$('#counterText').attr('value', "You have labelled " + temp + " Relationship(s)!");
 		console.log("num pins: " + relationshipLayer.children.length + " < " + "minReq: " + minRequired );
 		console.log("button is disabled");
 	} else {
 		$('#nextImage').removeAttr('disabled');
 		$('#nextImage').attr('value', 'Continue/Next');
-		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
+		$('#counterText').attr('value', "You have labelled " + temp + " Relationship(s)!");
 		//$('#nextImage').value ( "YES I DO!");
 		
 		console.log("num pins: " + relationshipLayer.children.length + " > " + "minReq: " + minRequired );
