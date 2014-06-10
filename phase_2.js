@@ -431,12 +431,16 @@ function loadPins() {
 	
 	var pinSize = 7;
 	
+	//console.log("length: " + imageObjectData.images[img_number].objects.length);
+	
 	for (i = 0; i < imageObjectData.images[img_number].objects.length; i++)
 	{
+		//console.log(i);
 		//if objects[i] is NULL, skip it!
 		if(imageObjectData.images[img_number].objects[i] != null)
 		{
 			
+			//console.log("Creating pin for " + i);
 		
 		
 			// console.log("Creating pin for #" + imageObjectData.objects[i].objectId + ", " + imageObjectData.objects[i].name);
@@ -452,7 +456,7 @@ function loadPins() {
 			var objectLabel = new Group();
 			objectLabel.name = "objectLabel";
 			objectLabel.objectId = imageObjectData.images[img_number].objects[i].objectId;
-			console.log("this is object " + objectLabel.objectId);
+			//console.log("this is object " + objectLabel.objectId);
 			objectLabel.addChild(pin);
 			// console.log("Creating pinText for " + imageObjectData.objects[i].name);
 			objectLabel.addChild(makeObjectTags(imageObjectData.images[img_number].objects[i].x, imageObjectData.images[img_number].objects[i].y, imageObjectData.images[img_number].objects[i].name));
@@ -462,13 +466,17 @@ function loadPins() {
 			// console.log("pins in layer = " + pinLayer.children.length);
 			// console.log("text in objectLabel = " + objectLabel.children['text'].content);
 			
-			for(i = 0; i < pinLayer.children.length; i++)
+			for(a = 0; a < pinLayer.children.length; a++)
 			{
 				if (objectLabel.children['text'].content == pinLayer.children[i].children['text'].content)
 				{
 					pin.fillColor = pinLayer.children[i].children['pin'].fillColor;
 				}
 			}
+		}
+		else
+		{
+			//console.log("null object at " + i);
 		}
 		
 	}

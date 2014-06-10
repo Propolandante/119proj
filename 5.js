@@ -16,12 +16,6 @@ var imageObjectData = {
 					"objectId": 9
 				},
 				{
-					"x": 374,
-					"y": 404,
-					"name": "keyboard",
-					"objectId": 12	
-				},
-				{
 					"x": 490,
 					"y": 421,
 					"name": "mouse",
@@ -86,6 +80,12 @@ var imageObjectData = {
 					"y": 256,
 					"name": "paper",
 					"objectId": 45
+				},
+				{
+					"x": 374,
+					"y": 404,
+					"name": "keyboard",
+					"objectId": 48	
 				}
 				
 			]
@@ -202,7 +202,7 @@ var imageObjectData = {
 					"x": 103,
 					"y": 416,
 					"objectId": 100,
-					"name": ""
+					"name": "kneepad"
 				},
 				{
 					"x": 496,
