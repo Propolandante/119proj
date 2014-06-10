@@ -468,9 +468,9 @@ function loadPins() {
 			
 			for(a = 0; a < pinLayer.children.length; a++)
 			{
-				if (objectLabel.children['text'].content == pinLayer.children[i].children['text'].content)
+				if (objectLabel.children['text'].content == pinLayer.children[a].children['text'].content)
 				{
-					pin.fillColor = pinLayer.children[i].children['pin'].fillColor;
+					pin.fillColor = pinLayer.children[a].children['pin'].fillColor;
 				}
 			}
 		}
