@@ -324,6 +324,19 @@ function displayObjectCount() {
 
 function loadNextImage() {
 	
+	
+	//this was for collecting JSON data for Phase 2 testing.
+	// Borrowed from Team B's code, good idea Team B!
+	if(userReport[img_number] != null)
+	{
+		// var jStr = JSON.stringify(userReport[img_number], null, "\t");
+		// var url = 'data:text/json;charset=utf8,' + encodeURIComponent(jStr);
+		// window.open(url, '_blank');
+		// window.focus();
+	}
+	
+	
+	
 	//delete everything. Well, the info is stored in the JSON structures but visually it will disappear
 	pinLayer.removeChildren();
 	//switch to imageLayer since we're changing the image
@@ -638,7 +651,7 @@ function checkMinimum() {
 	if(pinLayer.children.length < minRequired) {
 		$('#nextImage').attr('disabled', 'disabled');
 		//$('#nextImage').attr('value', "you must label a minimum of five objecets\n" + pinLayer.children.length  +"/ " + minRequired);
-		$('#nextImage').attr('value',  pinLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of " + minRequired +" objecets\n" );
+		$('#nextImage').attr('value',  pinLayer.children.length  +" / " + minRequired + "\nYou must label \na minimum of " + minRequired +" objects\n" );
 		$('#counterText').attr('value', "You have labelled " + temp + " Object(s)!");
 		console.log("num pins: " + pinLayer.children.length + " < " + "minReq: " + minRequired );
 		console.log("button is disabled");

@@ -1,16 +1,16 @@
 //derk.js
 
 // global variables
-var img_number = 4; //there is no "image 0", this is incremented before loading each image
-var img_count = 5; // total number of images in directory
-var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/1_images/";
+var img_number = 0; //there is no "image 0", this is incremented before loading each image
+var img_count = 4; // total number of images in directory
+var img_directory = "http://people.ucsc.edu/~djdonahu/119proj/2_images/";
 var raster; // image to be displayed
 var imageLayer = project.activeLayer; // this layer holds the raster
 var pinLayer = new Layer(); // all pins and text labels go in this label
 var relationshipLayer = new Layer();
 var tempArrowLayer = new Layer();
 var typing = false; // true if text box is active (nothing else should happen until this is false again)
-var userReport = [null,null,null,null,null]; // holds all of the user's imgData. userReport[0] will be empty
+var userReport = [null]; // holds all of the user's imgData. userReport[0] will be empty
 var userDefine = [];
 var vector; // this is the vector the user draws with
 var vectorStart;
@@ -27,14 +27,12 @@ var helperCounter = 0;
 
 var minRequired = 3;
 
+displayText();
 
 //load initial image in imageLayer
 loadNextImage();
 
-//load pins from JSON data to display over image
-loadPins();
 
-displayText();
 
 relationshipLayer.activate();
 
@@ -361,6 +359,7 @@ function loadNextImage() {
 	
 	//delete everything. Well, the info is stored in the JSON structures but visually it will disappear
 	pinLayer.removeChildren();
+	relationshipLayer.removeChildren();
 	//switch to imageLayer since we're changing the image
 	imageLayer.activate();
 	
@@ -388,6 +387,9 @@ function loadNextImage() {
 		
 		return;
 	}
+	
+	
+
 	//load JavaScript image from source
 	img.src = img_directory + img_number + ".jpg";
 	img.id = "image_" + img_number;
@@ -404,8 +406,8 @@ function loadNextImage() {
 	//lower image opacity for better text visibility
 	raster.opacity = 0.85;
 	
-	//revert back to pin layer
-	pinLayer.activate();
+	//load pins from JSON data to display over image
+	loadPins();
 	
 	//start new imageData Object in userReport array
 	userReport.push(new imageRelationshipData(img_number));
@@ -417,45 +419,57 @@ function loadNextImage() {
 	
 	$('#nextImage').attr('value',  0 +" / " + minRequired + "\nYou must label \na minimum of "+ minRequired +" relationships\n" );
 	
+	relationshipLayer.activate();
+	
 };
 
 function loadPins() {
 	
 	pinLayer.activate();
 	
+	console.log("Loading pins for image " + img_number);
+	
 	var pinSize = 7;
 	
-	for (i = 0; i < imageObjectData.objects.length; i++)
+	for (i = 0; i < imageObjectData.images[img_number].objects.length; i++)
 	{
 		//if objects[i] is NULL, skip it!
-		if(!imageObjectData.objects[i])
+		if(imageObjectData.images[img_number].objects[i] != null)
 		{
-			//skip to next object
-			break;
+			
+		
+		
+			// console.log("Creating pin for #" + imageObjectData.objects[i].objectId + ", " + imageObjectData.objects[i].name);
+			
+			var pin = new Path.Circle(new Point(imageObjectData.images[img_number].objects[i].x, imageObjectData.images[img_number].objects[i].y), pinSize);
+			
+			// set pin colors
+			pin.strokeColor = 'black';
+			pin.fillColor = getRandomColor();
+			pin.name = "pin";
+			
+			//group pin and text together
+			var objectLabel = new Group();
+			objectLabel.name = "objectLabel";
+			objectLabel.objectId = imageObjectData.images[img_number].objects[i].objectId;
+			console.log("this is object " + objectLabel.objectId);
+			objectLabel.addChild(pin);
+			// console.log("Creating pinText for " + imageObjectData.objects[i].name);
+			objectLabel.addChild(makeObjectTags(imageObjectData.images[img_number].objects[i].x, imageObjectData.images[img_number].objects[i].y, imageObjectData.images[img_number].objects[i].name));
+			
+			pin.selected = false;
+			
+			// console.log("pins in layer = " + pinLayer.children.length);
+			// console.log("text in objectLabel = " + objectLabel.children['text'].content);
+			
+			for(i = 0; i < pinLayer.children.length; i++)
+			{
+				if (objectLabel.children['text'].content == pinLayer.children[i].children['text'].content)
+				{
+					pin.fillColor = pinLayer.children[i].children['pin'].fillColor;
+				}
+			}
 		}
-		
-		// console.log("Creating pin for #" + imageObjectData.objects[i].objectId + ", " + imageObjectData.objects[i].name);
-		
-		var pin = new Path.Circle(new Point(imageObjectData.objects[i].x, imageObjectData.objects[i].y), pinSize);
-		
-		// set pin colors
-		pin.strokeColor = 'black';
-		pin.fillColor = 'blue';
-		pin.name = "pin";
-		
-		//group pin and text together
-		var objectLabel = new Group();
-		objectLabel.name = "objectLabel";
-		objectLabel.objectId = imageObjectData.objects[i].objectId;
-		console.log("this is object " + objectLabel.objectId);
-		objectLabel.addChild(pin);
-		// console.log("Creating pinText for " + imageObjectData.objects[i].name);
-		objectLabel.addChild(makeObjectTags(imageObjectData.objects[i].x, imageObjectData.objects[i].y, imageObjectData.objects[i].name));
-		
-		pin.selected = false;
-		
-		// console.log("pins in layer = " + pinLayer.children.length);
-		// console.log("text in objectLabel = " + objectLabel.children['text'].content);
 		
 	}
 };
@@ -752,6 +766,15 @@ function updateInstructions(event){
 	if(typing) instr.content = "Enter a name for this relationship.";
 	else if(dragging) instr.content = "Drag this object to another object define a relationship.";
 	else instr.content = "Click and drag an arrow from one object to another to label a relationship. This demonstration only has one example image.\nData collected from Phase I will be used as object data in Phase II.";
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
 
 // random jquery stuff for the tutorial
