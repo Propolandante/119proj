@@ -1,6 +1,6 @@
 .text-field {
     -moz-box-sizing: border-box;
-    border: 0.5px solid #00008B;
+    border: 0.5px solid 'blue';
     font-family: "Source Sans Pro",Arial,sans-serif;
     font-size: 11pt;
     font-weight: 600;
